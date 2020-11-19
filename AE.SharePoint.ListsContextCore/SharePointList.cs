@@ -9,34 +9,16 @@ using System.Threading.Tasks;
 
 namespace AE.SharePoint.ListsContextCore
 {
-    public class SharePointList<T> where T : new()
+    public class SharePointList<T> : SharePointListBase<T> where T : new()
     {
-        private static List<ListItemPropertyCreationInfo> propertiesCreationInfo;
-
         private readonly HttpClient httpClient;
-        private readonly string listName;
         private readonly IConverter converter;
 
-        public SharePointList(HttpClient httpClient, string listName)
+        public SharePointList(HttpClient httpClient, string listName): base(listName)
         {
             this.httpClient = httpClient;
-            this.listName = listName;
-            this.converter = new SharePointJsonConverter(propertiesCreationInfo); //TODO: подумать как сделать через внедрение зависимостей.
+            this.converter = new SharePointJsonConverter(PropertiesCreationInfo); //TODO: подумать как сделать через внедрение зависимостей.
         }
-
-        private List<ListItemPropertyCreationInfo> PropertiesCreationInfo
-        {
-            get
-            {
-                if (propertiesCreationInfo == null)
-                {
-                    propertiesCreationInfo = GetPropertiesCreationInfo();
-                }
-
-                return propertiesCreationInfo;
-            }
-        }
-
 
         public async Task<List<T>> GetAllItemsAsync()
         {
@@ -73,43 +55,7 @@ namespace AE.SharePoint.ListsContextCore
 
             return result;
         }
-
-        private List<ListItemPropertyCreationInfo> GetPropertiesCreationInfo()
-        {
-            Type selfType = typeof(T);
-
-            var creationInfo = GetAllowedProperties(selfType)
-                .Select(property =>
-                    new ListItemPropertyCreationInfo
-                    {
-                        PropertyToSet = property,
-                        SharePointFieldName = GetSharePointFieldName(property)
-                    }
-                )
-                .ToList();
-
-            return creationInfo;
-        }
-
-        private static IEnumerable<PropertyInfo> GetAllowedProperties(Type selfType)
-        {
-            
-            // Берутся только свойства у которых есть set метод даже если он приватный.
-            // Не берутся свойства, помеченные специальным атрибутом.
-            IEnumerable<PropertyInfo> properties = selfType
-                .GetProperties()
-                .Where(p => p.CanWrite && p.GetCustomAttributes(typeof(SharePointNotMappedAttribute)).Count() == 0);
-
-            //TODO: Ограничить передаваемые свойства можно еще с помощью специальных методов Include и Exclude
-
-            return properties;
-        }
-
-        public static string GetSharePointFieldName(PropertyInfo property)
-        {
-            var fieldNameAttribute = property.GetCustomAttributes(true).FirstOrDefault(a => a is SharePointFieldNameAttribute);
-            string fieldName = fieldNameAttribute != null ? ((SharePointFieldNameAttribute)fieldNameAttribute).Name : property.Name;
-            return fieldName;
-        }
+        
+        //TODO: Сделать методы которые бы формировали 
     }
 }

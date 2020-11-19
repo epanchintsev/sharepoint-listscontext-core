@@ -155,6 +155,10 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 Type elementType = type.GetElementType();
                 TypeCode elementTypeCode = Type.GetTypeCode(elementType);
 
+                var result = jsonField.EnumerateArray()
+                        .Select(o =>  o) //TODO: тут должно быть преобразование.
+                        .ToArray();
+
                 //switch (elementTypeCode)
                 //{
                 //    case TypeCode.Int32:
