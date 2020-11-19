@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace AE.SharePoint.ListsContextCore
 {
+    
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class SharePointListNameAttribute: Attribute
+    public class SharePointFieldNameAttribute: Attribute
     {
         private string name;
-        
-        public SharePointListNameAttribute(string name)
+
+        public SharePointFieldNameAttribute(string name)
         {
             this.name = name;
         }

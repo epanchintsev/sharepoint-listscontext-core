@@ -12,21 +12,21 @@ namespace AE.SharePoint.ListsContextCore
         private static List<SharePointListCreationInfo> properties;
         
         private readonly HttpClient httpClient;
-
+        
         public SharePointListsContext(HttpClient httpClient)
         {
             this.httpClient = httpClient;
-            
+
+            if (properties == null)
+            {
+                properties = GetPropertiesCreationInfo();
+            }
+
             InitSharePointListProperties();
         }
 
         private void InitSharePointListProperties()
         {
-            if (properties == null)
-            {
-                properties = GetPropertiesCreationInfo();                    
-            }
-
             foreach (var property in properties)
             {
                 var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { httpClient, property.ListName });
@@ -47,7 +47,7 @@ namespace AE.SharePoint.ListsContextCore
                     typeof(string)
                 };
 
-            properties = spListProperties
+            var properties = spListProperties
                 .Select(property =>
                 {
                     Type listItemType = property.PropertyType.GetGenericArguments()[0];
@@ -64,7 +64,7 @@ namespace AE.SharePoint.ListsContextCore
             return properties;
         }
 
-        private string GetListName(PropertyInfo property)
+        private static string GetListName(PropertyInfo property)
         {
             var listNameAttribute = property
                     .GetCustomAttributes(true)
