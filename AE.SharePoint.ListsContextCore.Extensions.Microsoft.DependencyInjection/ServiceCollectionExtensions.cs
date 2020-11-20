@@ -31,7 +31,7 @@ namespace AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjectio
                 {
                     return new HttpClientHandler()
                     {
-                        UseDefaultCredentials = true,
+                        UseDefaultCredentials = true, //TODO: проверить. возможно достаточно чего то одного.
                         Credentials = opt.Credentials
                     };
                 })

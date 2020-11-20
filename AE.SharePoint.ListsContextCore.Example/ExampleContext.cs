@@ -9,7 +9,7 @@ namespace AE.SharePoint.ListsContextCore.Example
     class ExampleContext: SharePointListsContext
     {
         public ExampleContext(HttpClient client): base(client)
-        {
+        {            
         }
 
         [SharePointListName("ExampleList")]

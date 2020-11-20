@@ -22,7 +22,7 @@ namespace AE.SharePoint.ListsContextCore
 
         public async Task<List<T>> GetAllItemsAsync()
         {
-            var path = $"/_api/web/lists/GetByTitle('{listName}')/items";
+            var path = $"/_api/web/lists/GetByTitle('{listName}')/items?$select={GetSelectParameter()}";
 
             //Для выбора полей GET https://{site_url}/_api/web/lists('{list_guid}')/items?$select=Title,Products/Name&$expand=Products/Name
 
@@ -36,7 +36,7 @@ namespace AE.SharePoint.ListsContextCore
 
         public async Task<T> GetItemAsync(int id)
         {
-            var path = $"/_api/web/lists/GetByTitle('{listName}')/items({id})";
+            var path = $"/_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
             var response = await httpClient.GetAsync(path);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
@@ -56,6 +56,18 @@ namespace AE.SharePoint.ListsContextCore
             return result;
         }
         
-        //TODO: Сделать методы которые бы формировали 
+        //TODO: Сделать методы которые бы формировали
+        
+        private string GetSelectParameter()
+        {
+            var selectParameter = string.Join(',', PropertiesCreationInfo.Select(x => x.SharePointFieldName));
+
+            return selectParameter;    
+        }
+
+        private string GetExpandParameter()
+        {
+            return string.Empty;
+        }
     }
 }
