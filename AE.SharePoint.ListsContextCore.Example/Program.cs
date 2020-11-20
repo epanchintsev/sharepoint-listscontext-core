@@ -4,6 +4,8 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 
 using AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection;
+using System.Collections.Generic;
+using AE.SharePoint.ListsContextCore.Example.Models;
 
 namespace AE.SharePoint.ListsContextCore.Example
 {
@@ -14,15 +16,14 @@ namespace AE.SharePoint.ListsContextCore.Example
         
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Start!");
             
             var serviceProvider = CreateServiceProvider();
             
             var context = serviceProvider.GetService<ExampleContext>();
+            List<ArticleListItem> items = context.Articles.GetAllItemsAsync().Result;
 
-            var items = context.List.GetAllItemsAsync().Result;
-
-            var item = context.List.GetItemAsync(1).Result;
+            ArticleListItem item = context.Articles.GetItemAsync(1).Result;
 
             var viewXml = new {
                 ViewXml =   "<View>" +
@@ -35,7 +36,7 @@ namespace AE.SharePoint.ListsContextCore.Example
                             "</View>"
                         };
 
-        var selectedItems = context.List.GetItemsAsync(viewXml.ToString()).Result;
+        var selectedItems = context.Articles.GetItemsAsync(viewXml.ToString()).Result;
         }
 
         private static ServiceProvider CreateServiceProvider()
@@ -44,8 +45,8 @@ namespace AE.SharePoint.ListsContextCore.Example
 
             serviceCollection.AddSharePointListsContext<ExampleContext>(options =>
             {
-                options.SharePointSiteUrl = "http://sharepointsite.url/sites/test-site";
-                options.Credentials = new NetworkCredential(userName, password);
+                options.SharePointSiteUrl = "http://sharepointsite.url/sites/test-site/"; //Слэш на конце обязателен.
+                // options.Credentials = new NetworkCredential(userName, password);
             }); 
 
             var serviceProvider = serviceCollection.BuildServiceProvider();

@@ -17,12 +17,12 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointList(HttpClient httpClient, string listName): base(listName)
         {
             this.httpClient = httpClient;
-            this.converter = new SharePointJsonConverter(PropertiesCreationInfo); //TODO: подумать как сделать через внедрение зависимостей.
+            this.converter = new SharePointJsonConverter(PropertiesCreationInfo);
         }
 
         public async Task<List<T>> GetAllItemsAsync()
         {
-            var path = $"/_api/web/lists/GetByTitle('{listName}')/items?$select={GetSelectParameter()}";
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items?$select={GetSelectParameter()}&$top=10000";
 
             //Для выбора полей GET https://{site_url}/_api/web/lists('{list_guid}')/items?$select=Title,Products/Name&$expand=Products/Name
 
@@ -36,7 +36,7 @@ namespace AE.SharePoint.ListsContextCore
 
         public async Task<T> GetItemAsync(int id)
         {
-            var path = $"/_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
             var response = await httpClient.GetAsync(path);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
@@ -47,7 +47,7 @@ namespace AE.SharePoint.ListsContextCore
 
         public async Task<List<T>> GetItemsAsync(string query)
         {
-            var path = $"/_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}";
+            var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}&$top=10000";
             var response = await httpClient.GetAsync(path);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
@@ -55,8 +55,6 @@ namespace AE.SharePoint.ListsContextCore
 
             return result;
         }
-        
-        //TODO: Сделать методы которые бы формировали
         
         private string GetSelectParameter()
         {

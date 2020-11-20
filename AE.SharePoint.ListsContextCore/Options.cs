@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection
+namespace AE.SharePoint.ListsContextCore
 {
     public class Options
     {

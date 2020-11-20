@@ -12,7 +12,7 @@ namespace AE.SharePoint.ListsContextCore.Example
         {            
         }
 
-        [SharePointListName("ExampleList")]
-        public SharePointList<ExampleList> List { get; set; }
+        [SharePointListName("ArticlesList")]
+        public SharePointList<ArticleListItem> Articles { get; set; }
     }
 }

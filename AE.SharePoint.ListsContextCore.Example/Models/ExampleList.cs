@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AE.SharePoint.ListsContextCore.Example.Models
 {
-    class ExampleList
+    class ArticleListItem
     {        
         public int Id { get; set; }
 
