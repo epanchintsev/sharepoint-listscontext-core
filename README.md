@@ -31,7 +31,7 @@ Supported types:
 * string
 
 Property mapped to SharePoint field by name.
-if you want to use property name different from SharePoint field name, use **SharePointListNameAttribute**.
+if you want to use property name different from SharePoint field name, use **SharePointFieldNameAttribute**.
 
 ```csharp
 class ArticleListItem
@@ -40,7 +40,7 @@ class ArticleListItem
 
     public string Title { get; set; }
 
-    [SharePointListName("Created")]
+    [SharePointFieldName("Created")]
     public DateTime PublicationDate  { get; set; }
 }
 ```
@@ -54,7 +54,7 @@ class ArticleListItem
 
     public string Title { get; set; }
 
-    [SharePointListName("Created")]
+    [SharePointFieldName("Created")]
     public DateTime PublicationDate  { get; set; }
 
     [SharePointNotMapped]
