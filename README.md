@@ -32,7 +32,6 @@ Supported types:
 
 Property mapped to SharePoint field by name.
 if you want to use property name different from SharePoint field name, use **SharePointFieldNameAttribute**.
-
 ```csharp
 class ArticleListItem
 {        
