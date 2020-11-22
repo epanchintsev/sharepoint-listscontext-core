@@ -9,6 +9,11 @@
     <PackageProjectUrl>https://github.com/epanchintsev/sharepoint-listscontext-core</PackageProjectUrl>
     <RepositoryUrl>https://github.com/epanchintsev/sharepoint-listscontext-core</RepositoryUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\AE.SharePoint.ListsContextCore.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

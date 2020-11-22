@@ -1,18 +1,27 @@
-﻿using AE.SharePoint.ListsContextCore.Infrastructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 
+using AE.SharePoint.ListsContextCore.Infrastructure;
+
 namespace AE.SharePoint.ListsContextCore
 {
+    /// <summary>
+    /// Base class for creating context of the SharePoint lists.
+    /// </summary>
     public class SharePointListsContext
     {
         private static List<SharePointListCreationInfo> properties;
         
         private readonly HttpClient httpClient;
-        
+
+        /// <summary>
+        /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
+        /// HttpClient.
+        /// </summary>
+        /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
         public SharePointListsContext(HttpClient httpClient)
         {
             this.httpClient = httpClient;

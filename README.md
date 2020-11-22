@@ -5,6 +5,15 @@
 
 ## Installation Instructions
 
+Install latest version of NuGet package:
+```
+PM> Install-Package AE.SharePoint.ListsContextCore
+```
+
+Additionaly you can install NuGet package for registration in Microsoft DI container:
+```
+PM> Install-Package AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection
+```
 
 ## Quick Start
 
