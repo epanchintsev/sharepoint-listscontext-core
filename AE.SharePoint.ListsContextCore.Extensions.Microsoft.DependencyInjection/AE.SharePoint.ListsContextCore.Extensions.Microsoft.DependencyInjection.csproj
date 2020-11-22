@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.1\AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

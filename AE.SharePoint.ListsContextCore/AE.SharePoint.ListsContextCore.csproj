@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>AE.SharePoint.ListsContextCore.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\AE.SharePoint.ListsContextCore.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
