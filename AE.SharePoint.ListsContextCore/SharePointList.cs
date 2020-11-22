@@ -1,25 +1,37 @@
-﻿using AE.SharePoint.ListsContextCore.Infrastructure;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
+
+using AE.SharePoint.ListsContextCore.Infrastructure;
 
 namespace AE.SharePoint.ListsContextCore
 {
+    /// <summary>
+    /// Represents a SharePoint list.
+    /// </summary>
+    /// <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
     public class SharePointList<T> : SharePointListBase<T> where T : new()
     {
         private readonly HttpClient httpClient;
         private readonly IConverter converter;
 
+        /// <summary>
+        /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
+        /// HttpClient and SharePoint list name.
+        /// </summary>
+        /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
+        /// <param name="listName">The name of the SharePoint list, displayed at the SharePoint site.</param>
         public SharePointList(HttpClient httpClient, string listName): base(listName)
         {
             this.httpClient = httpClient;
             this.converter = new SharePointJsonConverter(PropertiesCreationInfo);
         }
 
+        /// <summary>
+        /// Returns all the elements of the list.
+        /// </summary>
+        /// <returns>The Task object of strongly typed object list.</returns>
         public async Task<List<T>> GetAllItemsAsync()
         {
             var path = $"_api/web/lists/GetByTitle('{listName}')/items?$select={GetSelectParameter()}&$top=10000";
@@ -34,6 +46,12 @@ namespace AE.SharePoint.ListsContextCore
             return result;
         }
 
+
+        /// <summary>
+        /// Returns element with particular Id.
+        /// </summary>
+        /// <param name="id">Id of the target element.</param>
+        /// <returns>The Task object of strongly typed object.</returns>
         public async Task<T> GetItemAsync(int id)
         {
             var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
@@ -45,16 +63,17 @@ namespace AE.SharePoint.ListsContextCore
             return result;
         }
 
-        public async Task<List<T>> GetItemsAsync(string query)
-        {
-            var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}&$top=10000";
-            var response = await httpClient.GetAsync(path);
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            var result = converter.ConvertItems<T>(json);
+        // TODO: пока не реализован.
+        //public async Task<List<T>> GetItemsAsync(string query)
+        //{
+        //    var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}&$top=10000";
+        //    var response = await httpClient.GetAsync(path);
+        //    response.EnsureSuccessStatusCode();
+        //    var json = await response.Content.ReadAsStringAsync();
+        //    var result = converter.ConvertItems<T>(json);
 
-            return result;
-        }
+        //    return result;
+        //}
         
         private string GetSelectParameter()
         {

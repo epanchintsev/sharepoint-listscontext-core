@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AE.SharePoint.ListsContextCore</name>
+    </assembly>
+    <members>
+        <member name="T:AE.SharePoint.ListsContextCore.Infrastructure.HttpClientHelper">
+            <summary>
+            Helper class to configure System.Net.Http.HttpClient for using to access SharePoint REST API.
+            </summary>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.Infrastructure.HttpClientHelper.ConfigureHttpClient(System.Net.Http.HttpClient,AE.SharePoint.ListsContextCore.Options)">
+            <summary>
+            Configure System.Net.Http.HttpClient. Set base address and necessary headers.
+            </summary>
+            <param name="client">Instance of System.Net.Http.HttpClient that used in AE.SharePoint.ListsContextCore.SharePointListsContext.</param>
+            <param name="options"></param>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.Infrastructure.HttpClientHelper.GetHttpClientHandler(System.Net.ICredentials)">
+            <summary>
+            Returns configured System.Net.Http.HttpClientHandler whith set of authentication information.
+            </summary>
+            <param name="credentials">/// Credentials to access the SharePoint site. If not set, default credentials will be used.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.Options">
+            <summary>
+            Represents options to configure AE.SharePoint.ListsContextCore.SharePointListsContext.
+            </summary>
+        </member>
+        <member name="P:AE.SharePoint.ListsContextCore.Options.SharePointSiteUrl">
+            <summary>
+            SharePoint site address. Include protocol and trailing slash at the end of url.
+            </summary>
+        </member>
+        <member name="P:AE.SharePoint.ListsContextCore.Options.Credentials">
+            <summary>
+            Credentials to access the SharePoint site.
+            If not set, default credentials will be used.
+            </summary>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointFieldNameAttribute">
+            <summary>
+            Attribute is used to map a model property to a specific SharePoint list field, if field name and property name are different.
+            </summary>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointFieldNameAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointFieldNameAttribute list with the specified name.
+            </summary>
+            <param name="name">Original name of a SharePoint field.</param>
+        </member>
+        <member name="P:AE.SharePoint.ListsContextCore.SharePointFieldNameAttribute.Name">
+            <summary>
+            Original name of a SharePoint field.
+            </summary>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointList`1">
+            <summary>
+            Represents a SharePoint list.
+            </summary>
+            <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointList`1.#ctor(System.Net.Http.HttpClient,System.String)">
+            <summary>
+            Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
+            HttpClient and SharePoint list name.
+            </summary>
+            <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
+            <param name="listName">The name of the SharePoint list, displayed at the SharePoint site.</param>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointList`1.GetAllItemsAsync">
+            <summary>
+            Returns all the elements of the list.
+            </summary>
+            <returns>The Task object of strongly typed object list.</returns>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointList`1.GetItemAsync(System.Int32)">
+            <summary>
+            Returns element with particular Id.
+            </summary>
+            <param name="id">Id of the target element.</param>
+            <returns>The Task object of strongly typed object.</returns>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointListBase`1">
+            <summary>
+            Abstract class incapsulate base logic for SharePointList.
+            </summary>
+            <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
+        </member>
+        <member name="F:AE.SharePoint.ListsContextCore.SharePointListBase`1.listName">
+            <summary>
+            Displayed name of the SharePointList.
+            </summary>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointListBase`1.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
+            SharePoint list name.
+            </summary>
+            <param name="listName">Displayed name of the SharePointList.</param>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointListNameAttribute">
+            <summary>
+            Attribute is used to map a context property to a specific SharePoint list.
+            </summary>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointListNameAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListNameAttribute list with the specified name.
+            </summary>
+            <param name="name">Displayed name of the SharePointList.</param>
+        </member>
+        <member name="P:AE.SharePoint.ListsContextCore.SharePointListNameAttribute.Name">
+            <summary>
+            Displayed name of the SharePointList.
+            </summary>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointListsContext">
+            <summary>
+            Base class for creating context of the SharePoint lists.
+            </summary>
+        </member>
+        <member name="M:AE.SharePoint.ListsContextCore.SharePointListsContext.#ctor(System.Net.Http.HttpClient)">
+            <summary>
+            Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
+            HttpClient.
+            </summary>
+            <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
+        </member>
+        <member name="T:AE.SharePoint.ListsContextCore.SharePointNotMappedAttribute">
+            <summary>
+            Attribute used to mark the property of the SharePoint list model that does not have corresponting field in list, 
+            and should not initialized by value from SharePoint.
+            </summary>
+        </member>
+    </members>
+</doc>

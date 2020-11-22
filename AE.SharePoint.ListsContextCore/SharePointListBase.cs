@@ -1,18 +1,30 @@
-﻿using AE.SharePoint.ListsContextCore.Infrastructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+
+using AE.SharePoint.ListsContextCore.Infrastructure;
 
 namespace AE.SharePoint.ListsContextCore
 {
+    /// <summary>
+    /// Abstract class incapsulate base logic for SharePointList.
+    /// </summary>
+    /// <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
     public abstract class SharePointListBase<T>
     {
         private static List<ListItemPropertyCreationInfo> propertiesCreationInfo;
 
+        /// <summary>
+        /// Displayed name of the SharePointList.
+        /// </summary>
         protected readonly string listName;
 
+        /// <summary>
+        /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
+        /// SharePoint list name.
+        /// </summary>
+        /// <param name="listName">Displayed name of the SharePointList.</param>
         public SharePointListBase(string listName)
         {
             this.listName = listName;
