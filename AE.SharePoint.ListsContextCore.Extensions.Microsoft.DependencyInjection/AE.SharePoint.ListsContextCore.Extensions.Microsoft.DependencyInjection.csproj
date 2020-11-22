@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>0.1.0</Version>
+    <Authors>Alexander Epanchintesv</Authors>
+    <Company />
+    <PackageProjectUrl>https://github.com/epanchintsev/sharepoint-listscontext-core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/epanchintsev/sharepoint-listscontext-core</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
