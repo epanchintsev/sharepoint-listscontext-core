@@ -9,6 +9,10 @@
     <RepositoryUrl>https://github.com/epanchintsev/sharepoint-listscontext-core</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AE.SharePoint.ListsContextCore" Version="0.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
