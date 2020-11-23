@@ -16,6 +16,7 @@ namespace AE.SharePoint.ListsContextCore
         private static List<SharePointListCreationInfo> properties;
         
         private readonly HttpClient httpClient;
+        private readonly FormDigestStorage formDigestStorage;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
@@ -25,6 +26,7 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointListsContext(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            formDigestStorage = new FormDigestStorage(httpClient);
 
             if (properties == null)
             {
@@ -38,7 +40,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             foreach (var property in properties)
             {
-                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { httpClient, property.ListName });
+                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { httpClient, formDigestStorage, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }
         }
@@ -50,11 +52,12 @@ namespace AE.SharePoint.ListsContextCore
                 .GetProperties()
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(SharePointList<>));
 
-            var constructorArguments = new Type[2]
-                {
-                    typeof(HttpClient),
-                    typeof(string)
-                };
+            var constructorArguments = new Type[3]
+            {
+                typeof(HttpClient),
+                typeof(FormDigestStorage),
+                typeof(string)
+            };
 
             var properties = spListProperties
                 .Select(property =>
