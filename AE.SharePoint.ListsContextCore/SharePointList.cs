@@ -73,7 +73,7 @@ namespace AE.SharePoint.ListsContextCore
         /// <returns></returns>
         public async Task<List<T>> GetItemsAsync(string query)
         {
-            var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}&$top=10000";
+            var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={{'ViewXml':'{query}'}}&$top=10000";
             var digest = await formDigestStorage.GetFormDigestAsync();
             
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
