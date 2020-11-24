@@ -132,3 +132,8 @@ namespace AE.SharePoint.ListsContextCore
 //        return result;
 //    }
 //}
+
+
+
+// "{\"query\":{\"__metadata\":{\"type\":\"SP.CamlQuery\"},\"ViewXml\":\"{ ViewXml = \\u003CView\\u003E\\u003CQuery\\u003E\\u003CWhere\\u003E\\u003CEq\\u003E\\u003CFieldRef Name=\\u0027ID\\u0027 /\\u003E\\u003CValue Type=\\u0027Number\\u0027\\u003E1\\u003C/Value\\u003E\\u003C/Eq\\u003E\\u003C/Where\\u003E\\u003C/Query\\u003E\\u003C/View\\u003E }\"}}"
+

@@ -10,7 +10,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
     {
         private static DateTime created;
         private static string value;
-        private static int time;
+        private static int timeoutSeconds;
         
         private readonly HttpClient httpClient;
 
@@ -26,7 +26,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 await InitDigestAsync();
             }
 
-            if((DateTime.Now - created).TotalSeconds >= time)
+            if((DateTime.Now - created).TotalSeconds >= timeoutSeconds)
             {
                 await InitDigestAsync();
             }
@@ -45,7 +45,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             var contextWebInformation = jsonDocument.RootElement.GetProperty("d").GetProperty("GetContextWebInformation");
             
             value = contextWebInformation.GetProperty("FormDigestValue").GetString();
-            time = contextWebInformation.GetProperty("FormDigestTime").GetInt32();
+            timeoutSeconds = contextWebInformation.GetProperty("FormDigestTimeoutSeconds").GetInt32();
             created = DateTime.Now;            
         }
     }

@@ -52,13 +52,6 @@ namespace AE.SharePoint.ListsContextCore
                 .GetProperties()
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(SharePointList<>));
 
-            var constructorArguments = new Type[3]
-            {
-                typeof(HttpClient),
-                typeof(FormDigestStorage),
-                typeof(string)
-            };
-
             var properties = spListProperties
                 .Select(property =>
                 {
@@ -68,7 +61,9 @@ namespace AE.SharePoint.ListsContextCore
                     {
                         PropertyToSet = property,
                         ListName = GetListName(property),
-                        PropertyInstanceConstructor = typeof(SharePointList<>).MakeGenericType(listItemType).GetConstructor(constructorArguments)
+                        PropertyInstanceConstructor = typeof(SharePointList<>)
+                            .MakeGenericType(listItemType)
+                            .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
                     };
                 })
                 .ToList();
