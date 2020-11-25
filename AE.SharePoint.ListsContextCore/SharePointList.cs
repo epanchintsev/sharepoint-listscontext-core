@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using AE.SharePoint.ListsContextCore.Infrastructure;
@@ -99,39 +102,48 @@ namespace AE.SharePoint.ListsContextCore
         {
             return string.Empty;
         }
+
+        //public async Task<List<T>> GetItemsAsync(string query)
+        //{
+        //    //var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}";
+
+        //    var digest = await GetDigestAsync();
+
+        //    //query = "<View><Query></Query></View>";
+
+        //    var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems";
+        //    var dataObj = new { query = new { __metadata = new { type = "SP.CamlQuery" }, ViewXml = query } };
+        //    var options = new JsonSerializerOptions
+        //    {
+        //        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        //        WriteIndented = true
+        //    };
+        //    var dataJson = System.Text.Json.JsonSerializer.Serialize(dataObj, options);
+        //    var data = new StringContent(dataJson, Encoding.UTF8, "application/json");
+
+        //    //var response = await httpClient.PostAsync(path, data);
+
+
+        //    using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
+        //    {
+        //        requestMessage.Headers.Add("X-RequestDigest", digest.FormDigestValue);
+        //        requestMessage.Headers.Remove("Content-Type");
+        //        requestMessage.Headers.Add("Content-Type", "application/json; charset=utf-8");
+        //        requestMessage.Content = data;
+        //        var response = await httpClient.SendAsync(requestMessage);
+
+        //        response.EnsureSuccessStatusCode();
+        //        var json = await response.Content.ReadAsStringAsync();
+        //        var result = converter.ConvertItems<T>(json);
+
+        //        return result;
+        //    }
+        //}
     }
 }
 
 
-//public async Task<List<T>> GetItemsAsync(string query)
-//{
-//    //var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems(query=@v1)?@v1={query}";
 
-//    var digest = await GetDigestAsync();
-
-//    //query = "<View><Query></Query></View>";
-
-//    var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems";
-//    var dataObj = new { query = new { __metadata = new { type = "SP.CamlQuery" }, ViewXml = query } };
-//    var dataJson = System.Text.Json.JsonSerializer.Serialize(dataObj);
-//    var data = new StringContent(dataJson, Encoding.UTF8, "application/json");
-
-//    //var response = await httpClient.PostAsync(path, data);
-
-
-//    using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
-//    {
-//        requestMessage.Headers.Add("X-RequestDigest", digest.FormDigestValue);
-//        requestMessage.Content = data;
-//        var response = await httpClient.SendAsync(requestMessage);
-
-//        response.EnsureSuccessStatusCode();
-//        var json = await response.Content.ReadAsStringAsync();
-//        var result = converter.ConvertItems<T>(json);
-
-//        return result;
-//    }
-//}
 
 
 
