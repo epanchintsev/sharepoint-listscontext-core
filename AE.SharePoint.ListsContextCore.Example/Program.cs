@@ -25,18 +25,16 @@ namespace AE.SharePoint.ListsContextCore.Example
 
             ArticleListItem item = context.Articles.GetItemAsync(1).Result;
 
-            var viewXml = new {
-                ViewXml =   "<View>" +
+            string ViewXml = "<View>" +
                                 "<Query>" +
                                     "<Where><Eq>" +
-                                        "<FieldRef Name='Category' LookupId='True' />" +
-                                        "<Value Type='Lookup'>1</Value>" +
+                                        "<FieldRef Name='Title' />" +
+                                        "<Value Type='Text'>Happy New Year</Value>" +
                                     "</Eq></Where>" +
                                 "</Query>" +
-                            "</View>"
-                        };
+                            "</View>";
 
-        var selectedItems = context.Articles.GetItemsAsync(viewXml.ToString()).Result;
+            List<ArticleListItem> selectedItems = context.Articles.GetItemsAsync(ViewXml).Result;
         }
 
         private static ServiceProvider CreateServiceProvider()

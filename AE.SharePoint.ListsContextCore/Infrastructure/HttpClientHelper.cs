@@ -23,7 +23,6 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             {
                 client.DefaultRequestHeaders.Add("X-FORMS_BASED_AUTH_ACCEPTED", "f");
             }
-            client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
             client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
         }
 

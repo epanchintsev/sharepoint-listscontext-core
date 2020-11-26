@@ -15,8 +15,8 @@ namespace AE.SharePoint.ListsContextCore
     {
         private static List<SharePointListCreationInfo> properties;
         
-        private readonly HttpClient httpClient;
         private readonly FormDigestStorage formDigestStorage;
+        private readonly SharePointRestApiClient restApiClient;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
@@ -24,9 +24,9 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
         public SharePointListsContext(HttpClient httpClient)
-        {
-            this.httpClient = httpClient;
+        {            
             formDigestStorage = new FormDigestStorage(httpClient);
+            restApiClient = new SharePointRestApiClient(httpClient);
 
             if (properties == null)
             {
@@ -40,7 +40,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             foreach (var property in properties)
             {
-                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { httpClient, formDigestStorage, property.ListName });
+                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }
         }
