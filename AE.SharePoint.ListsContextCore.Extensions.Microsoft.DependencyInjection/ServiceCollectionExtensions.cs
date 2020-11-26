@@ -30,7 +30,7 @@ namespace AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjectio
             serviceCollection.AddScoped<T>();
 
             serviceCollection
-                .AddHttpClient<SharePointListsContext>(client => HttpClientHelper.ConfigureHttpClient(client, opt))
+                .AddHttpClient<T>(client => HttpClientHelper.ConfigureHttpClient(client, opt))
                 .ConfigurePrimaryHttpMessageHandler(() => HttpClientHelper.GetHttpClientHandler(opt.Credentials))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
         }

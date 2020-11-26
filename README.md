@@ -118,4 +118,22 @@ var context = serviceProvider.GetService<ExampleContext>();
 ArticleListItem item = await context.Articles.GetItemAsync(1);
 ```
 
+Or get items from the list based on the specified CAML query.
 
+```csharp
+string ViewXml = "<View>" +
+                    "<Query>" +
+                        "<Where><Eq>" +
+                            "<FieldRef Name='Title' />" +
+                            "<Value Type='Text'>Happy New Year</Value>" +
+                        "</Eq></Where>" +
+                    "</Query>" +
+                "</View>";
+
+List<ArticleListItem> selectedItems = context.Articles.GetItemsAsync(ViewXml)
+```
+
+## Release Notes
+
+### Version 1.0.0-alpha
+- Created methods for getting intems from SharePoint List: Task<List<T>> GetAllItemsAsync(), Task<T> GetItemAsync(int id), Task<List<T>> GetItemsAsync(string query)
