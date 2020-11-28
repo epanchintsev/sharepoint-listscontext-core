@@ -137,3 +137,6 @@ List<ArticleListItem> selectedItems = context.Articles.GetItemsAsync(ViewXml)
 
 ### Version 1.0.0-alpha
 - Created methods for getting intems from SharePoint List: Task<List<T>> GetAllItemsAsync(), Task<T> GetItemAsync(int id), Task<List<T>> GetItemsAsync(string query)
+
+### Version 1.0.0
+- Fixed error in Task<T> GetItemAsync(int id)
