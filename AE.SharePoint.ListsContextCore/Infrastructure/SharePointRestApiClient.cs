@@ -49,5 +49,17 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return result;
         }
 
+        public async Task DeleteAsync(string path, string digest)
+        {
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
+            {
+                requestMessage.Headers.Add("X-RequestDigest", digest);
+                requestMessage.Headers.Add("If-Match", "*");
+                requestMessage.Headers.Add("X-HTTP-Method", "DELETE");
+                var response = await httpClient.SendAsync(requestMessage);
+                response.EnsureSuccessStatusCode();
+            }
+        }
+
     }
 }

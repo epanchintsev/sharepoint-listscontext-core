@@ -76,6 +76,13 @@ namespace AE.SharePoint.ListsContextCore
             return result;
         }
 
+        public async Task DeleteItemAsync(int id)
+        {
+            var digest = await formDigestStorage.GetFormDigestAsync();
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})";            
+            await restApiClient.DeleteAsync(path, digest);
+        }
+
         private string GetSelectParameter()
         {
             var selectParameter = string.Join(',', PropertiesCreationInfo.Select(x => x.SharePointFieldName));
