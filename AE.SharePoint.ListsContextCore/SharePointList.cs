@@ -12,6 +12,8 @@ namespace AE.SharePoint.ListsContextCore
     /// <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
     public sealed class SharePointList<T> : SharePointListBase<T> where T : new()
     {
+        private static string sharePointTypeName;
+        
         private readonly SharePointRestApiClient restApiClient;
         private readonly IConverter converter;
         private readonly FormDigestStorage formDigestStorage;
@@ -28,6 +30,16 @@ namespace AE.SharePoint.ListsContextCore
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
             this.converter = new SharePointJsonConverter(PropertiesCreationInfo);
+        }
+
+        internal async Task<string> GetSharePointTypeNameAsync()
+        {            
+            if(string.IsNullOrEmpty(sharePointTypeName))
+            {
+                sharePointTypeName = await GetSharePointEntityTypeFullNameAsync();
+            }
+
+            return sharePointTypeName;
         }
 
         /// <summary>
@@ -55,7 +67,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
             var json = await restApiClient.GetAsync(path);
-            var result = converter.Convert<T>(json);
+            var result = converter.ConvertFromSPEntity<T>(json);
             
             return result;
         }
@@ -71,9 +83,27 @@ namespace AE.SharePoint.ListsContextCore
             var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems?$select={GetSelectParameter()}";
             var data = new { query = new { __metadata = new { type = "SP.CamlQuery" }, ViewXml = query }};
             var json = await restApiClient.PostAsync(path, digest, data);
-            var result = converter.ConvertItems<T>(json);
+            var result = converter.ConvertFromSPEntities<T>(json);
 
             return result;
+        }
+
+        public async Task AddItemAsync(T item)
+        {
+            var digest = await formDigestStorage.GetFormDigestAsync();
+            string type = await GetSharePointTypeNameAsync();
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items";
+            var json = converter.ConvertToSPEntity<T>(item, type);
+            await restApiClient.PostAsync(path, digest, json); //TODO: Тут нужен другой метод!!!
+
+        }
+
+        public async Task UpdateItemAsync(T item)
+        {
+            var digest = await formDigestStorage.GetFormDigestAsync();
+            string type = await GetSharePointTypeNameAsync();
+            //var path = $"_api/web/lists/GetByTitle('{listName}')/items({item_id})";
+
         }
 
         public async Task DeleteItemAsync(int id)
@@ -93,6 +123,16 @@ namespace AE.SharePoint.ListsContextCore
         private string GetExpandParameter()
         {
             return string.Empty;
+        }
+
+        private async Task<string> GetSharePointEntityTypeFullNameAsync()
+        {            
+            var path = $"_api/web/lists/GetByTitle('{listName}')?$select=ListItemEntityTypeFullName";
+            var json = await restApiClient.GetAsync(path);
+            var jsonDocument = System.Text.Json.JsonDocument.Parse(json);
+            var sharePointEntityTypeFullName = jsonDocument.RootElement.GetProperty("d").GetProperty("ListItemEntityTypeFullName").ToString();
+
+            return sharePointEntityTypeFullName;
         }
 
         

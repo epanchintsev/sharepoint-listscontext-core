@@ -6,9 +6,10 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 {
     internal interface IConverter
     {
-        List<T> ConvertItems<T>(object source) where T : new();
+        T ConvertFromSPEntity<T>(Object source) where T : new();
 
+        List<T> ConvertFromSPEntities<T>(object source) where T : new();
 
-        T Convert<T>(Object source) where T : new();
+        string ConvertToSPEntity<T>(Object source, string sharePointTypeName);
     }
 }
