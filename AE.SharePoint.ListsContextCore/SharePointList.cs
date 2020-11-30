@@ -48,11 +48,9 @@ namespace AE.SharePoint.ListsContextCore
         /// <returns>The Task object of strongly typed object list.</returns>
         public async Task<List<T>> GetAllItemsAsync()
         {
-            //Для выбора полей GET https://{site_url}/_api/web/lists('{list_guid}')/items?$select=Title,Products/Name&$expand=Products/Name
-
-            var path = $"_api/web/lists/GetByTitle('{listName}')/items?$select={GetSelectParameter()}&$top=10000";
-            var json = await restApiClient.GetAsync(path);
-            var result = converter.ConvertItems<T>(json);
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = 10000 };
+            var json = await restApiClient.GetItemsAsync(listName, parameters);
+            var result = converter.ConvertFromSPEntities<T>(json);
 
             return result;
         }
@@ -64,9 +62,9 @@ namespace AE.SharePoint.ListsContextCore
         /// <param name="id">Id of the target element.</param>
         /// <returns>The Task object of strongly typed object.</returns>
         public async Task<T> GetItemAsync(int id)
-        {
-            var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})?$select={GetSelectParameter()}";
-            var json = await restApiClient.GetAsync(path);
+        {            
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter()};
+            var json = await restApiClient.GetItemAsync(listName, id, parameters);
             var result = converter.ConvertFromSPEntity<T>(json);
             
             return result;
@@ -80,9 +78,8 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<List<T>> GetItemsAsync(string query)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
-            var path = $"_api/web/lists/GetByTitle('{listName}')/GetItems?$select={GetSelectParameter()}";
-            var data = new { query = new { __metadata = new { type = "SP.CamlQuery" }, ViewXml = query }};
-            var json = await restApiClient.PostAsync(path, digest, data);
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = 10000 };
+            var json = await restApiClient.GetItemsAsync(listName, digest, query, parameters);
             var result = converter.ConvertFromSPEntities<T>(json);
 
             return result;
@@ -92,10 +89,8 @@ namespace AE.SharePoint.ListsContextCore
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
             string type = await GetSharePointTypeNameAsync();
-            var path = $"_api/web/lists/GetByTitle('{listName}')/items";
             var json = converter.ConvertToSPEntity<T>(item, type);
-            await restApiClient.PostAsync(path, digest, json); //TODO: Тут нужен другой метод!!!
-
+            await restApiClient.AddItemAsync(listName, digest, json);
         }
 
         public async Task UpdateItemAsync(T item)
@@ -109,8 +104,7 @@ namespace AE.SharePoint.ListsContextCore
         public async Task DeleteItemAsync(int id)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
-            var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})";            
-            await restApiClient.DeleteAsync(path, digest);
+            await restApiClient.DeleteItemAsync(listName, digest, id);
         }
 
         private string GetSelectParameter()
@@ -126,9 +120,9 @@ namespace AE.SharePoint.ListsContextCore
         }
 
         private async Task<string> GetSharePointEntityTypeFullNameAsync()
-        {            
-            var path = $"_api/web/lists/GetByTitle('{listName}')?$select=ListItemEntityTypeFullName";
-            var json = await restApiClient.GetAsync(path);
+        {
+            var parameters = new ApiRequestParameters { Select = "ListItemEntityTypeFullName" };
+            var json = await restApiClient.GetListAsync(listName, parameters);
             var jsonDocument = System.Text.Json.JsonDocument.Parse(json);
             var sharePointEntityTypeFullName = jsonDocument.RootElement.GetProperty("d").GetProperty("ListItemEntityTypeFullName").ToString();
 
