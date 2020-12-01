@@ -11,12 +11,12 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         private static DateTime created;
         private static string value;
         private static int timeoutSeconds;
-        
-        private readonly HttpClient httpClient;
 
-        public FormDigestStorage(HttpClient httpClient)
+        private readonly SharePointRestApiClient restApiClient;
+
+        public FormDigestStorage(SharePointRestApiClient restApiClient)
         {
-            this.httpClient = httpClient;
+            this.restApiClient = restApiClient;
         }
 
         public async Task<string> GetFormDigestAsync()
@@ -36,11 +36,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
         private async Task InitDigestAsync()
         {
-            var digestPath = $"_api/contextinfo";
-
-            var response = await httpClient.PostAsync(digestPath, null);
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await restApiClient.GetContextInfoAsync();
             var jsonDocument = System.Text.Json.JsonDocument.Parse(json);
             var contextWebInformation = jsonDocument.RootElement.GetProperty("d").GetProperty("GetContextWebInformation");
             

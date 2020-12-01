@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -51,16 +52,38 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 WriteIndented = true
             };
-            var dataJson = System.Text.Json.JsonSerializer.Serialize(data, options);
-            string result = await PostAsync(path, digest, dataJson);
+            var dataJson = JsonSerializer.Serialize(data, options);
+            var headers = new Dictionary<string, string>()
+            {
+                ["X-RequestDigest"] = digest
+            };
+            string result = await PostAsync(path, dataJson, headers);
 
             return result;
         }
 
         public async Task<string> AddItemAsync(string listName, string digest, string itemJson)
         {
-            var path = $"_api/web/lists/GetByTitle('{listName}')/items";
-            string result = await PostAsync(path, digest, itemJson);
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items";            
+            var headers = new Dictionary<string, string>()
+            {
+                ["X-RequestDigest"] = digest
+            };
+            string result = await PostAsync(path, itemJson, headers);
+
+            return result;
+        }
+
+        public async Task<string> UpdateItemAsync(string listName, int id, string digest, string itemJson)
+        {
+            var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})";
+            var headers = new Dictionary<string, string>()
+            {
+                ["X-RequestDigest"] = digest,
+                ["If-Match"] = "*",
+                ["X-HTTP-Method"] = "MERGE"
+            };
+            string result = await PostAsync(path, itemJson, headers);
 
             return result;
         }
@@ -79,6 +102,17 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             }
         }
 
+        public async Task<string> GetContextInfoAsync()
+        {
+            var path = $"_api/contextinfo";
+
+            var response = await httpClient.PostAsync(path, null);
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+
+            return json;
+        }
+
         private async Task<string> GetAsync(string path)
         {
             var response = await httpClient.GetAsync(path);
@@ -88,7 +122,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return json;
         }
 
-        private async Task<string> PostAsync(string path, string digest, string dataJson)
+        private async Task<string> PostAsync(string path, string dataJson, Dictionary<string,string> headers)
         {
             string result;
 
@@ -98,7 +132,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
             {
-                requestMessage.Headers.Add("X-RequestDigest", digest);
+                foreach(var header in headers)
+                {
+                    requestMessage.Headers.Add(header.Key, header.Value);
+                }                
+                
                 requestMessage.Content = content;
                 var response = await httpClient.SendAsync(requestMessage);
                 response.EnsureSuccessStatusCode();

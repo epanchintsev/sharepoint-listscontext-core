@@ -95,10 +95,11 @@ namespace AE.SharePoint.ListsContextCore
 
         public async Task UpdateItemAsync(T item)
         {
+            var id = ((IListItemBase)item).Id;
             var digest = await formDigestStorage.GetFormDigestAsync();
             string type = await GetSharePointTypeNameAsync();
-            //var path = $"_api/web/lists/GetByTitle('{listName}')/items({item_id})";
-
+            var json = converter.ConvertToSPEntity<T>(item, type);
+            await restApiClient.UpdateItemAsync(listName, id, digest, json);
         }
 
         public async Task DeleteItemAsync(int id)

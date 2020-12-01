@@ -200,7 +200,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 }
             }
 
-            propertyToSet.SetValue(targetItem, jsonField);            
+            propertyToSet.SetValueFromJson(targetItem, jsonField);            
         }
 
         public static void SetReferenceType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
@@ -259,7 +259,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             }
             else if (type == typeof(String))
             {
-                propertyToSet.SetValue(targetItem, jsonField);
+                propertyToSet.SetValueFromJson(targetItem, jsonField);
             }
             //else if (type == typeof(SharePointUrlField))
             //{

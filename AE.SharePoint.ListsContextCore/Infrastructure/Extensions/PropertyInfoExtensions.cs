@@ -6,7 +6,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
 {
     internal static class PropertyInfoExtensions
     {
-        public static void SetValue(this PropertyInfo property, Object obj, JsonElement value)
+        public static void SetValueFromJson(this PropertyInfo property, Object obj, JsonElement value)
         {            
             TypeCode typeCode = Type.GetTypeCode(property.PropertyType);
 
