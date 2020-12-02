@@ -10,7 +10,7 @@ namespace AE.SharePoint.ListsContextCore
     /// Represents a SharePoint list.
     /// </summary>
     /// <typeparam name="T">Type of the class that represents fields model of the SharePoint list.</typeparam>
-    public sealed class SharePointList<T> : SharePointListBase<T> where T : new()
+    public sealed class SharePointList<T> : SharePointListBase<T> where T : class, new()
     {
         private static string sharePointTypeName;
         
@@ -57,9 +57,9 @@ namespace AE.SharePoint.ListsContextCore
 
 
         /// <summary>
-        /// Returns item with particular Id.
+        /// Returns item with specified Id.
         /// </summary>
-        /// <param name="id">Id of the target element.</param>
+        /// <param name="id">Id of the target item.</param>
         /// <returns>The Task object of strongly typed object.</returns>
         public async Task<T> GetItemAsync(int id)
         {            
@@ -85,14 +85,35 @@ namespace AE.SharePoint.ListsContextCore
             return result;
         }
 
-        public async Task AddItemAsync(T item)
+        /// <summary>
+        /// Adds item to list.
+        /// </summary>
+        /// <param name="item">Item to add.</param>
+        /// <returns>Created item.</returns>
+        public async Task<T> AddItemAsync(T item)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
             string type = await GetSharePointTypeNameAsync();
             var json = converter.ConvertToSPEntity<T>(item, type);
-            await restApiClient.AddItemAsync(listName, digest, json);
+            var resultJson = await restApiClient.AddItemAsync(listName, digest, json); //TODO: возможно стоит сделать ограничение возввращаемых полей.
+            
+            if(string.IsNullOrEmpty(resultJson))
+            {
+                return null;
+            }
+
+            var result = converter.ConvertFromSPEntity<T>(resultJson);
+
+            return result;
         }
 
+        /// <summary>
+        /// Updates item in list.
+        /// </summary>
+        /// <param name="item">Item with new values of properties. 
+        /// Must be inherited from IListItemBase, and have Id property.
+        /// Id property specifies which item should be updated.</param>
+        /// <returns></returns>
         public async Task UpdateItemAsync(T item)
         {
             var id = ((IListItemBase)item).Id;
@@ -102,6 +123,11 @@ namespace AE.SharePoint.ListsContextCore
             await restApiClient.UpdateItemAsync(listName, id, digest, json);
         }
 
+        /// <summary>
+        /// Deletes item with specified Id.
+        /// </summary>
+        /// <param name="id">Id of the target item.</param>
+        /// <returns></returns>
         public async Task DeleteItemAsync(int id)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
