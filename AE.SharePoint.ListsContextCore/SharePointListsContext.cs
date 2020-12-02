@@ -24,9 +24,9 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
         public SharePointListsContext(HttpClient httpClient)
-        {            
-            formDigestStorage = new FormDigestStorage(httpClient);
+        {
             restApiClient = new SharePointRestApiClient(httpClient);
+            formDigestStorage = new FormDigestStorage(restApiClient);            
 
             if (properties == null)
             {
