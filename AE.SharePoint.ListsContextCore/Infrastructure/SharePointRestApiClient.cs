@@ -74,7 +74,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return result;
         }
 
-        public async Task<string> UpdateItemAsync(string listName, int id, string digest, string itemJson)
+        public async Task UpdateItemAsync(string listName, int id, string digest, string itemJson)
         {
             var path = $"_api/web/lists/GetByTitle('{listName}')/items({id})";
             var headers = new Dictionary<string, string>()
@@ -83,9 +83,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 ["If-Match"] = "*",
                 ["X-HTTP-Method"] = "MERGE"
             };
-            string result = await PostAsync(path, itemJson, headers);
-
-            return result;
+            await PostAsync(path, itemJson, headers);
         }
 
         public async Task DeleteItemAsync(string listName, string digest, int id)

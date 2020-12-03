@@ -12,6 +12,6 @@ namespace AE.SharePoint.ListsContextCore
         /// <summary>
         /// List item unique identifier.
         /// </summary>
-        public int Id { get; set; }
+        int Id { get; set; }
     }
 }
