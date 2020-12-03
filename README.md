@@ -130,8 +130,54 @@ string ViewXml = "<View>" +
                     "</Query>" +
                 "</View>";
 
-List<ArticleListItem> selectedItems = context.Articles.GetItemsAsync(ViewXml)
+List<ArticleListItem> selectedItems = await context.Articles.GetItemsAsync(ViewXml)
 ```
+### 5. Add item to SharePoint list.
+To add new item, create item class with specified properties and add it to list using AddItemAsync(T item) method.
+Method returns created item from SharePoint list.
+
+```csharp
+var context = serviceProvider.GetService<ExampleContext>();
+var newItem = new ArticleListItem
+{
+    Title = "Happy New 2019 Year"
+};
+
+ArticleListItem createdItem = await context.Articles.AddItemAsync(newItem);
+```
+
+### 6. Update item in SharePoint list.
+If you want to update existing item use UpdateItemAsync(T item).
+*Item class must implements IListItemBase interface*. And have initialized Id property with identifier of item witch you want to update.
+You may use ListItemBase class as base class of your models.
+
+```csharp
+var context = serviceProvider.GetService<ExampleContext>();
+
+class ArticleListItem: ListItemBase
+{
+    public string Title { get; set; }
+
+    [SharePointFieldName("Created")]
+    public DateTime PublicationDate  { get; set; }
+
+    [SharePointNotMapped]
+    public string Year  { get; set; }
+}
+
+createdItem.Title = "Happy New 2020 Year";
+await context.Articles.UpdateItemAsync(newItem);
+```
+
+### 7. Delete item from SharePoint list.
+
+To delete item from SharePoint list use DeleteItemAsync(int id) method.
+
+```csharp
+var context = serviceProvider.GetService<ExampleContext>();
+await context.Articles.DeleteItemAsync(1);
+```
+
 
 ## Release Notes
 
