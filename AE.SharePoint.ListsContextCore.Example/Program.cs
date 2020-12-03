@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection;
 using System.Collections.Generic;
 using AE.SharePoint.ListsContextCore.Example.Models;
+using System.Threading.Tasks;
 
 namespace AE.SharePoint.ListsContextCore.Example
 {
@@ -14,14 +15,14 @@ namespace AE.SharePoint.ListsContextCore.Example
         private const string userName = "epanchintsev";
         private const string password = "";
         
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Start!");
             
             var serviceProvider = CreateServiceProvider();
             
             var context = serviceProvider.GetService<ExampleContext>();
-            List<ArticleListItem> items = context.Articles.GetAllItemsAsync().Result;
+            List<ArticleListItem> items = await context.Articles.GetAllItemsAsync();
 
             ArticleListItem item = context.Articles.GetItemAsync(1).Result;
 
@@ -34,7 +35,15 @@ namespace AE.SharePoint.ListsContextCore.Example
                                 "</Query>" +
                             "</View>";
 
-            List<ArticleListItem> selectedItems = context.Articles.GetItemsAsync(ViewXml).Result;
+            List<ArticleListItem> selectedItems = await context.Articles.GetItemsAsync(ViewXml);
+
+            var newItem = new ArticleListItem
+            {
+                Title = "Happy New 2019 Year"
+            };
+
+            ArticleListItem createdItem = await context.Articles.AddItemAsync(newItem);
+
         }
 
         private static ServiceProvider CreateServiceProvider()
