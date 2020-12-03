@@ -136,7 +136,7 @@ namespace AE.SharePoint.ListsContextCore
 
         private string GetSelectParameter()
         {
-            var selectParameter = string.Join(',', PropertiesCreationInfo.Select(x => x.SharePointFieldName));
+            var selectParameter = string.Join(",", PropertiesCreationInfo.Select(x => x.SharePointFieldName));
 
             return selectParameter;    
         }
