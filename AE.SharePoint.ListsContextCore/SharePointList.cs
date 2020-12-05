@@ -162,6 +162,16 @@ namespace AE.SharePoint.ListsContextCore
             return this;
         }
 
+        public SharePointList<T> IncludeFields()
+        {
+            return this;
+        }
+
+        public SharePointList<T> ExcludeFields()
+        {
+            return this;
+        }
+
         private string GetSelectParameter()
         {
             var selectParameter = string.Join(",", PropertiesCreationInfo.Select(x => x.SharePointFieldName));
