@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,6 +19,8 @@ namespace AE.SharePoint.ListsContextCore
         private readonly IConverter converter;
         private readonly FormDigestStorage formDigestStorage;
 
+        private int top;
+
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
         /// HttpClient and SharePoint list name.
@@ -30,6 +33,8 @@ namespace AE.SharePoint.ListsContextCore
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
             this.converter = new SharePointJsonConverter(PropertiesCreationInfo);
+
+            ResetParams();
         }
 
         internal async Task<string> GetSharePointTypeNameAsync()
@@ -48,9 +53,10 @@ namespace AE.SharePoint.ListsContextCore
         /// <returns>The Task object of strongly typed object list.</returns>
         public async Task<List<T>> GetAllItemsAsync()
         {
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = 10000 };
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, parameters);
             var result = converter.ConvertFromSPEntities<T>(json);
+            ResetParams();
 
             return result;
         }
@@ -66,7 +72,8 @@ namespace AE.SharePoint.ListsContextCore
             var parameters = new ApiRequestParameters { Select = GetSelectParameter()};
             var json = await restApiClient.GetItemAsync(listName, id, parameters);
             var result = converter.ConvertFromSPEntity<T>(json);
-            
+            ResetParams();
+
             return result;
         }
 
@@ -78,9 +85,10 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<List<T>> GetItemsAsync(string query)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = 10000 };
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, digest, query, parameters);
             var result = converter.ConvertFromSPEntities<T>(json);
+            ResetParams();
 
             return result;
         }
@@ -103,6 +111,7 @@ namespace AE.SharePoint.ListsContextCore
             }
 
             var result = converter.ConvertFromSPEntity<T>(resultJson);
+            ResetParams();
 
             return result;
         }
@@ -121,6 +130,7 @@ namespace AE.SharePoint.ListsContextCore
             string type = await GetSharePointTypeNameAsync();
             var json = converter.ConvertToSPEntity<T>(item, type);
             await restApiClient.UpdateItemAsync(listName, id, digest, json);
+            ResetParams();
         }
 
         /// <summary>
@@ -132,6 +142,24 @@ namespace AE.SharePoint.ListsContextCore
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
             await restApiClient.DeleteItemAsync(listName, digest, id);
+            ResetParams();
+        }
+
+
+        /// <summary>
+        /// Sets quantity of returned items.
+        /// </summary>
+        /// <param name="count">Quantity of returned items.</param>
+        /// <returns></returns>
+        public SharePointList<T> Take(int count)
+        {
+            if(count <= 0)
+            {
+                throw new ArgumentException($"The value of {nameof(count)} must be greater than zero.");
+            }
+            
+            top = count;
+            return this;
         }
 
         private string GetSelectParameter()
@@ -144,6 +172,11 @@ namespace AE.SharePoint.ListsContextCore
         private string GetExpandParameter()
         {
             return string.Empty;
+        }
+
+        private void ResetParams()
+        {
+            top = 10000;
         }
 
         private async Task<string> GetSharePointEntityTypeFullNameAsync()
