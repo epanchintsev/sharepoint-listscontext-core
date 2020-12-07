@@ -181,8 +181,10 @@ await context.Articles.DeleteItemAsync(1);
 
 ## Release Notes
 
-### Version 1.0.0-alpha
+### Version 1.0.0
 - Created methods for getting intems from SharePoint List: Task<List<T>> GetAllItemsAsync(), Task<T> GetItemAsync(int id), Task<List<T>> GetItemsAsync(string query)
 
-### Version 1.0.0
-- Fixed error in Task<T> GetItemAsync(int id)
+### Version 1.1.0
+- Created method for adding item to SharePoint List: Task<T> AddItemAsync(T item)
+- Created method for updating item in SharePoint List: Task UpdateItemAsync(T item)
+- Created method for delete item from SharePoint List: Task DeleteItemAsync(int id)
