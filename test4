@@ -1,0 +1,8 @@
+private string[] GetNamesFromExpression(Expression<Func<T, object>> expr)
+        {
+            var x = ((NewExpression)expr.Body).Members;
+            string[] names = x.Select(m => m.Name).ToArray();
+            return names;
+        }
+
+Wrong datetime
