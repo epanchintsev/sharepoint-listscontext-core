@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection\AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\AE.SharePoint.ListsContextCore\AE.SharePoint.ListsContextCore.csproj" />
   </ItemGroup>
 

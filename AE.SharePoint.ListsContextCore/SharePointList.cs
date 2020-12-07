@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using AE.SharePoint.ListsContextCore.Infrastructure;
@@ -20,6 +21,8 @@ namespace AE.SharePoint.ListsContextCore
         private readonly FormDigestStorage formDigestStorage;
 
         private int top;
+        private string[] includedFields;
+        private string[] excludedFields;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
@@ -162,19 +165,27 @@ namespace AE.SharePoint.ListsContextCore
             return this;
         }
 
-        public SharePointList<T> IncludeFields()
+        public SharePointList<T> IncludeFields(Expression<Func<T,object>> fields)
         {
+            includedFields = GetNamesFromExpression(fields);
             return this;
         }
 
-        public SharePointList<T> ExcludeFields()
+        public SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
         {
+            excludedFields = GetNamesFromExpression(fields);
             return this;
         }
 
         private string GetSelectParameter()
         {
-            var selectParameter = string.Join(",", PropertiesCreationInfo.Select(x => x.SharePointFieldName));
+            var usedProperties = PropertiesCreationInfo
+                .Where(x => 
+                    (includedFields.Length > 0 && includedFields.Contains(x.PropertyToSet.Name)) || 
+                    (excludedFields.Length > 0 && !excludedFields.Contains(x.PropertyToSet.Name))
+                );
+
+            var selectParameter = string.Join(",", usedProperties.Select(x => x.SharePointFieldName));
 
             return selectParameter;    
         }
@@ -187,6 +198,8 @@ namespace AE.SharePoint.ListsContextCore
         private void ResetParams()
         {
             top = 10000;
+            includedFields = new string[0];
+            excludedFields = new string[0];
         }
 
         private async Task<string> GetSharePointEntityTypeFullNameAsync()
@@ -199,6 +212,13 @@ namespace AE.SharePoint.ListsContextCore
             return sharePointEntityTypeFullName;
         }
 
-        
+        private string[] GetNamesFromExpression(Expression<Func<T, object>> expr)
+        {
+            var x = ((NewExpression)expr.Body).Members;
+            string[] names = x.Select(m => m.Name).ToArray();
+            return names;
+        }
+
+
     }
 }
