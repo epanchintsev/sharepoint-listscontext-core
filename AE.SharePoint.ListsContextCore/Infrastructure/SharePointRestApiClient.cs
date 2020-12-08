@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AE.SharePoint.ListsContextCore.Infrastructure.Extensions;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -96,15 +97,27 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 requestMessage.Headers.Add("If-Match", "*");
                 requestMessage.Headers.Add("X-HTTP-Method", "DELETE");
                 var response = await httpClient.SendAsync(requestMessage);
+                await response.EnsureNon404StatusCodeAsync();
                 response.EnsureSuccessStatusCode();
             }
         }
 
         public async Task<string> GetContextInfoAsync()
         {
-            var path = $"_api/contextinfo";
+            var path = "_api/contextinfo";
 
             var response = await httpClient.PostAsync(path, null);
+            await response.EnsureNon404StatusCodeAsync();
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+
+            return json;
+        }
+
+        public async Task<string> GetTimeZone()
+        {
+            var path = "_api/web/RegionalSettings/TimeZone";
+            var response = await httpClient.GetAsync(path);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
 
@@ -114,6 +127,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         private async Task<string> GetAsync(string path)
         {
             var response = await httpClient.GetAsync(path);
+            await response.EnsureNon404StatusCodeAsync();
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
 
@@ -137,6 +151,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 
                 requestMessage.Content = content;
                 var response = await httpClient.SendAsync(requestMessage);
+                await response.EnsureNon404StatusCodeAsync();
                 response.EnsureSuccessStatusCode();
                 result = await response.Content.ReadAsStringAsync();
             }

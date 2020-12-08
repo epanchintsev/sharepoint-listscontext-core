@@ -150,7 +150,7 @@ namespace AE.SharePoint.ListsContextCore
 
 
         /// <summary>
-        /// Sets quantity of returned items.
+        /// Specifies quantity of returned items.
         /// </summary>
         /// <param name="count">Quantity of returned items.</param>
         /// <returns></returns>
@@ -165,12 +165,24 @@ namespace AE.SharePoint.ListsContextCore
             return this;
         }
 
+        /// <summary>
+        /// Determines for which fields the data should be received from SharePoint.
+        /// Properties for which fields are not included in the set will have default values.
+        /// </summary>
+        /// <param name="fields">Set of properties the data for which to get from SharePoint.</param>
+        /// <returns></returns>
         public SharePointList<T> IncludeFields(Expression<Func<T,object>> fields)
         {
             includedFields = GetNamesFromExpression(fields);
             return this;
         }
 
+        /// <summary>
+        /// Determines for which fields the data should not be received from SharePoint.
+        /// Properties for which fields are excluded will have default values.
+        /// </summary>
+        /// <param name="fields">Set of properties the data for which to should not get from SharePoint.</param>
+        /// <returns></returns>
         public SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
         {
             excludedFields = GetNamesFromExpression(fields);
