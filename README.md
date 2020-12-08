@@ -130,7 +130,7 @@ string ViewXml = "<View>" +
                     "</Query>" +
                 "</View>";
 
-List<ArticleListItem> selectedItems = await context.Articles.GetItemsAsync(ViewXml)
+List<ArticleListItem> selectedItems = await context.Articles.GetItemsAsync(ViewXml);
 ```
 ### 5. Add item to SharePoint list.
 To add new item, create item class with specified properties and add it to list using AddItemAsync(T item) method.
@@ -178,11 +178,27 @@ var context = serviceProvider.GetService<ExampleContext>();
 await context.Articles.DeleteItemAsync(1);
 ```
 
+### 8. Optimizing request.
+
+You can limit quantity of returned elements by using Take method.
+Or you can receive only nessesary fields by using IncludeFields and ExcludeFields methods.
+In example below GetAllItemsAsync returns only 5 items, and not retrieve data for Content field, that field will be initialized with default value.
+
+```csharp
+List<ArticleListItem> selectedItems = await context.Articles
+    .ExcludeFields(x => new { x.Content })
+    .Take(5)
+    .GetAllItemsAsync();
+```
+
+
 
 ## Release Notes
 
-### Version 1.0.0-alpha
+### Version 1.0.0
 - Created methods for getting intems from SharePoint List: Task<List<T>> GetAllItemsAsync(), Task<T> GetItemAsync(int id), Task<List<T>> GetItemsAsync(string query)
 
-### Version 1.0.0
-- Fixed error in Task<T> GetItemAsync(int id)
+### Version 1.1.0
+- Created method for adding item to SharePoint List: Task<T> AddItemAsync(T item)
+- Created method for updating item in SharePoint List: Task UpdateItemAsync(T item)
+- Created method for deleting item from SharePoint List: Task DeleteItemAsync(int id)

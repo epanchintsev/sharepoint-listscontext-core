@@ -35,7 +35,7 @@ namespace AE.SharePoint.ListsContextCore.Example
                                 "</Query>" +
                             "</View>";
 
-            List<ArticleListItem> selectedItems = await context.Articles.GetItemsAsync(ViewXml);
+            List<ArticleListItem> selectedItems = await context.Articles.Take(1).GetItemsAsync(ViewXml);
 
             var newItem = new ArticleListItem
             {
@@ -43,6 +43,11 @@ namespace AE.SharePoint.ListsContextCore.Example
             };
 
             ArticleListItem createdItem = await context.Articles.AddItemAsync(newItem);
+
+            List<ArticleListItem> items2 = await context.Articles
+                .ExcludeFields(x => new { x.Title })
+                .Take(5)
+                .GetAllItemsAsync();
 
         }
 
