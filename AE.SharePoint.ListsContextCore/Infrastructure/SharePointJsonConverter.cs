@@ -14,7 +14,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
     {
         private readonly List<ListItemPropertyCreationInfo> propertiesCreationInfo;
 
-        public SharePointJsonConverter(List<ListItemPropertyCreationInfo> propertiesCreationInfo)
+        public SharePointJsonConverter(ref List<ListItemPropertyCreationInfo> propertiesCreationInfo)
         {
             this.propertiesCreationInfo = propertiesCreationInfo;
         }
