@@ -23,6 +23,7 @@ namespace AE.SharePoint.ListsContextCore
         private int top;
         private string[] includedFields;
         private string[] excludedFields;
+        private List<ListItemPropertyCreationInfo> usedPropertiesCreationInfo;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
@@ -35,7 +36,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
-            this.converter = new SharePointJsonConverter(PropertiesCreationInfo);
+            this.converter = new SharePointJsonConverter(ref usedPropertiesCreationInfo);
 
             ResetParams();
         }
@@ -55,7 +56,7 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <returns>The Task object of strongly typed object list.</returns>
         public async Task<List<T>> GetAllItemsAsync()
-        {
+        {            
             var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, parameters);
             var result = converter.ConvertFromSPEntities<T>(json);
@@ -72,7 +73,7 @@ namespace AE.SharePoint.ListsContextCore
         /// <returns>The Task object of strongly typed object.</returns>
         public async Task<T> GetItemAsync(int id)
         {            
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter()};
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter() };
             var json = await restApiClient.GetItemAsync(listName, id, parameters);
             var result = converter.ConvertFromSPEntity<T>(json);
             ResetParams();
@@ -86,7 +87,7 @@ namespace AE.SharePoint.ListsContextCore
         /// <param name="query">CAML query as string.</param>
         /// <returns></returns>
         public async Task<List<T>> GetItemsAsync(string query)
-        {
+        {            
             var digest = await formDigestStorage.GetFormDigestAsync();
             var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, digest, query, parameters);
@@ -174,6 +175,7 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointList<T> IncludeFields(Expression<Func<T,object>> fields)
         {
             includedFields = GetNamesFromExpression(fields);
+            UpdateUsedProperties();
             return this;
         }
 
@@ -186,19 +188,23 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
         {
             excludedFields = GetNamesFromExpression(fields);
+            UpdateUsedProperties();
             return this;
+        }
+
+        private void UpdateUsedProperties()
+        {
+            usedPropertiesCreationInfo = PropertiesCreationInfo
+                .Where(x =>
+                    (includedFields.Length == 0 || includedFields.Contains(x.PropertyToSet.Name)) &&
+                    (excludedFields.Length == 0 || !excludedFields.Contains(x.PropertyToSet.Name))
+                )
+                .ToList();
         }
 
         private string GetSelectParameter()
         {
-            var usedProperties = PropertiesCreationInfo
-                .Where(x => 
-                    (includedFields.Length > 0 && includedFields.Contains(x.PropertyToSet.Name)) || 
-                    (excludedFields.Length > 0 && !excludedFields.Contains(x.PropertyToSet.Name))
-                );
-
-            var selectParameter = string.Join(",", usedProperties.Select(x => x.SharePointFieldName));
-
+            var selectParameter = string.Join(",", usedPropertiesCreationInfo.Select(x => x.SharePointFieldName));
             return selectParameter;    
         }
 
@@ -212,6 +218,7 @@ namespace AE.SharePoint.ListsContextCore
             top = 10000;
             includedFields = new string[0];
             excludedFields = new string[0];
+            usedPropertiesCreationInfo = PropertiesCreationInfo;
         }
 
         private async Task<string> GetSharePointEntityTypeFullNameAsync()
