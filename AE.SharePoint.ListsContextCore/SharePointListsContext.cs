@@ -40,7 +40,8 @@ namespace AE.SharePoint.ListsContextCore
         {
             foreach (var property in properties)
             {
-                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, property.ListName });
+                var converter = new SharePointJsonConverter();
+                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }
         }

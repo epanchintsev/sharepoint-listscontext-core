@@ -12,24 +12,21 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 {
     internal class SharePointJsonConverter : IConverter
     {
-        private readonly List<ListItemPropertyCreationInfo> propertiesCreationInfo;
-
-        public SharePointJsonConverter(ref List<ListItemPropertyCreationInfo> propertiesCreationInfo)
-        {
-            this.propertiesCreationInfo = propertiesCreationInfo;
+        public SharePointJsonConverter()
+        {            
         }
 
-        public T ConvertFromSPEntity<T>(object source) where T : new()
+        public T ConvertFromSPEntity<T>(object source, IEnumerable<ListItemPropertyCreationInfo> properties) where T : new()
         {
             var sourceJson = source as string;
             JsonDocument jsonDocument = JsonDocument.Parse(sourceJson);
             JsonElement jsonItem = jsonDocument.RootElement.GetProperty("d");
-            var result = CreateObject<T>(jsonItem);
+            var result = CreateObject<T>(jsonItem, properties);
 
             return result;
         }
 
-        public List<T> ConvertFromSPEntities<T>(object source) where T: new()
+        public List<T> ConvertFromSPEntities<T>(object source, IEnumerable<ListItemPropertyCreationInfo> properties) where T: new()
         {
             var sourceJson = source as string;
             JsonDocument jsonDocument = JsonDocument.Parse(sourceJson);
@@ -37,22 +34,22 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             var jsonItems = jsonResults.EnumerateArray();
 
             var result = jsonItems
-                .Select(i => CreateObject<T>(i))
+                .Select(i => CreateObject<T>(i, properties))
                 .ToList();
 
             return result;
         }
 
-        public string ConvertToSPEntity<T>(Object source, string sharePointTypeName)
+        public string ConvertToSPEntity<T>(Object source, string sharePointTypeName, IEnumerable<ListItemPropertyCreationInfo> properties)
         {
-            return CreateJson(source, sharePointTypeName);
+            return CreateJson(source, sharePointTypeName, properties);
         }
 
-        private T CreateObject<T>(JsonElement sourceJson) where T : new()
+        private T CreateObject<T>(JsonElement sourceJson, IEnumerable<ListItemPropertyCreationInfo> properties) where T : new()
         {
             var newItem = new T();
 
-            foreach(var property in propertiesCreationInfo)
+            foreach(var property in properties)
             {
                 if(!sourceJson.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
                 {
@@ -75,7 +72,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return newItem;
         }
 
-        private string CreateJson<T>(T sourceObject, string sharePointTypeName)
+        private string CreateJson<T>(T sourceObject, string sharePointTypeName, IEnumerable<ListItemPropertyCreationInfo> properties)
         {
             string resultJson;
 
@@ -88,7 +85,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 writer.WriteString("type", sharePointTypeName);
                 writer.WriteEndObject();
 
-                foreach (var property in propertiesCreationInfo)
+                foreach (var property in properties)
                 {
                     Type type = property.PropertyToSet.PropertyType;
 

@@ -22,8 +22,7 @@ namespace AE.SharePoint.ListsContextCore
 
         private int top;
         private string[] includedFields;
-        private string[] excludedFields;
-        private List<ListItemPropertyCreationInfo> usedPropertiesCreationInfo;
+        private string[] excludedFields;        
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
@@ -31,12 +30,13 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <param name="restApiClient">The instance of SharePointRestApiClient.</param>
         /// <param name="formDigestStorage"></param>
+        /// <param name="converter"></param>
         /// <param name="listName">The name of the SharePoint list, displayed at the SharePoint site.</param>
-        internal SharePointList(SharePointRestApiClient restApiClient, FormDigestStorage formDigestStorage, string listName): base(listName)
+        internal SharePointList(SharePointRestApiClient restApiClient, FormDigestStorage formDigestStorage, IConverter converter, string listName): base(listName)
         {
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
-            this.converter = new SharePointJsonConverter(ref usedPropertiesCreationInfo);
+            this.converter = converter;
 
             ResetParams();
         }
@@ -56,10 +56,11 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <returns>The Task object of strongly typed object list.</returns>
         public async Task<List<T>> GetAllItemsAsync()
-        {            
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
+        {
+            var usedProperties = GetUsedProperties();
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, parameters);
-            var result = converter.ConvertFromSPEntities<T>(json);
+            var result = converter.ConvertFromSPEntities<T>(json, usedProperties);
             ResetParams();
 
             return result;
@@ -72,10 +73,11 @@ namespace AE.SharePoint.ListsContextCore
         /// <param name="id">Id of the target item.</param>
         /// <returns>The Task object of strongly typed object.</returns>
         public async Task<T> GetItemAsync(int id)
-        {            
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter() };
+        {
+            var usedProperties = GetUsedProperties();
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties) };
             var json = await restApiClient.GetItemAsync(listName, id, parameters);
-            var result = converter.ConvertFromSPEntity<T>(json);
+            var result = converter.ConvertFromSPEntity<T>(json, usedProperties);
             ResetParams();
 
             return result;
@@ -89,9 +91,10 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<List<T>> GetItemsAsync(string query)
         {            
             var digest = await formDigestStorage.GetFormDigestAsync();
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(), Top = top };
+            var usedProperties = GetUsedProperties();
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, digest, query, parameters);
-            var result = converter.ConvertFromSPEntities<T>(json);
+            var result = converter.ConvertFromSPEntities<T>(json, usedProperties);
             ResetParams();
 
             return result;
@@ -105,8 +108,8 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<T> AddItemAsync(T item)
         {
             var digest = await formDigestStorage.GetFormDigestAsync();
-            string type = await GetSharePointTypeNameAsync();
-            var json = converter.ConvertToSPEntity<T>(item, type);
+            string type = await GetSharePointTypeNameAsync();            
+            var json = converter.ConvertToSPEntity<T>(item, type, PropertiesCreationInfo);
             var resultJson = await restApiClient.AddItemAsync(listName, digest, json); //TODO: возможно стоит сделать ограничение возввращаемых полей.
             
             if(string.IsNullOrEmpty(resultJson))
@@ -114,7 +117,7 @@ namespace AE.SharePoint.ListsContextCore
                 return null;
             }
 
-            var result = converter.ConvertFromSPEntity<T>(resultJson);
+            var result = converter.ConvertFromSPEntity<T>(resultJson, PropertiesCreationInfo); //Пока возвращаются все свойства.
             ResetParams();
 
             return result;
@@ -132,7 +135,8 @@ namespace AE.SharePoint.ListsContextCore
             var id = ((IListItemBase)item).Id;
             var digest = await formDigestStorage.GetFormDigestAsync();
             string type = await GetSharePointTypeNameAsync();
-            var json = converter.ConvertToSPEntity<T>(item, type);
+            var usedProperties = GetUsedProperties();
+            var json = converter.ConvertToSPEntity<T>(item, type, usedProperties);
             await restApiClient.UpdateItemAsync(listName, id, digest, json);
             ResetParams();
         }
@@ -175,7 +179,6 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointList<T> IncludeFields(Expression<Func<T,object>> fields)
         {
             includedFields = GetNamesFromExpression(fields);
-            UpdateUsedProperties();
             return this;
         }
 
@@ -188,23 +191,29 @@ namespace AE.SharePoint.ListsContextCore
         public SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
         {
             excludedFields = GetNamesFromExpression(fields);
-            UpdateUsedProperties();
             return this;
         }
 
-        private void UpdateUsedProperties()
+        private List<ListItemPropertyCreationInfo> GetUsedProperties()
         {
-            usedPropertiesCreationInfo = PropertiesCreationInfo
+            if(includedFields.Length == 0 && excludedFields.Length == 0)
+            {
+                return PropertiesCreationInfo;
+            }
+            
+            var usedProperties = PropertiesCreationInfo
                 .Where(x =>
                     (includedFields.Length == 0 || includedFields.Contains(x.PropertyToSet.Name)) &&
                     (excludedFields.Length == 0 || !excludedFields.Contains(x.PropertyToSet.Name))
                 )
                 .ToList();
+
+            return usedProperties;
         }
 
-        private string GetSelectParameter()
+        private string GetSelectParameter(IEnumerable<ListItemPropertyCreationInfo> properties)
         {
-            var selectParameter = string.Join(",", usedPropertiesCreationInfo.Select(x => x.SharePointFieldName));
+            var selectParameter = string.Join(",", properties.Select(x => x.SharePointFieldName));
             return selectParameter;    
         }
 
@@ -218,7 +227,6 @@ namespace AE.SharePoint.ListsContextCore
             top = 10000;
             includedFields = new string[0];
             excludedFields = new string[0];
-            usedPropertiesCreationInfo = PropertiesCreationInfo;
         }
 
         private async Task<string> GetSharePointEntityTypeFullNameAsync()
@@ -237,7 +245,5 @@ namespace AE.SharePoint.ListsContextCore
             string[] names = x.Select(m => m.Name).ToArray();
             return names;
         }
-
-
     }
 }
