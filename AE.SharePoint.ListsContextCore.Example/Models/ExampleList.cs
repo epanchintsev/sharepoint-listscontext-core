@@ -4,10 +4,12 @@ using System.Text;
 
 namespace AE.SharePoint.ListsContextCore.Example.Models
 {
-    class ArticleListItem
+    class ArticleListItem: IListItemBase
     {        
         public int Id { get; set; }
 
         public string Title { get; set; }
+
+        public string Description { get; set; }
     }
 }

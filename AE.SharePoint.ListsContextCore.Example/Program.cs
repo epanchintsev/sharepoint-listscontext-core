@@ -22,6 +22,7 @@ namespace AE.SharePoint.ListsContextCore.Example
             var serviceProvider = CreateServiceProvider();
             
             var context = serviceProvider.GetService<ExampleContext>();
+
             List<ArticleListItem> items = await context.Articles.GetAllItemsAsync();
 
             ArticleListItem item = context.Articles.GetItemAsync(1).Result;
@@ -44,11 +45,14 @@ namespace AE.SharePoint.ListsContextCore.Example
 
             ArticleListItem createdItem = await context.Articles.AddItemAsync(newItem);
 
-            List<ArticleListItem> items2 = await context.Articles
-                .ExcludeFields(x => new { x.Title })
+            List<ArticleListItem> itemsInShortForm = await context.Articles
+                .ExcludeFields(x => new { x.Description })
                 .Take(5)
                 .GetAllItemsAsync();
 
+            List<ArticleListItem> itemIds = await context.Articles
+                .IncludeFields(x => new { x.Id })                
+                .GetAllItemsAsync();
         }
 
         private static ServiceProvider CreateServiceProvider()
