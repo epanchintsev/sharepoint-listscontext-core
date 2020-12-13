@@ -12,8 +12,12 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 {
     internal class SharePointJsonConverter : IConverter
     {
-        public SharePointJsonConverter()
-        {            
+        private bool datesFromText;
+
+
+        public SharePointJsonConverter(bool datesFromText)
+        {
+            this.datesFromText = datesFromText;
         }
 
         public T ConvertFromSPEntity<T>(object source, IEnumerable<ListItemPropertyCreationInfo> properties) where T : new()
@@ -51,7 +55,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
             foreach(var property in properties)
             {
-                if(!sourceJson.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
+                JsonElement source = IsDateFormText(property) ?
+                    sourceJson.GetProperty("FieldValusesAsText"):
+                    sourceJson;
+                
+                if(!source.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
                 {
                     //TODO: Сделать новый тип для исключения.
                     throw new Exception($"Can`t find SharePoint field for property {property.PropertyToSet.Name}");
@@ -296,5 +304,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         //{
         //    throw new NotImplementedException(string.Format("Не реализовано преобразование поля списка SharePoint для типа данных {0}", type));
         //}
+
+        private bool IsDateFormText(ListItemPropertyCreationInfo propertyCreationInfo)
+        {
+            var isDateFromText = datesFromText && Type.GetTypeCode(propertyCreationInfo.PropertyToSet.PropertyType) == TypeCode.DateTime;
+            return isDateFromText;
+        }
     }
 }

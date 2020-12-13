@@ -1,10 +1,12 @@
-﻿using AE.SharePoint.ListsContextCore.Infrastructure.Extensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
+
+using AE.SharePoint.ListsContextCore.Infrastructure.Extensions;
 
 namespace AE.SharePoint.ListsContextCore.Infrastructure
 {
@@ -161,27 +163,29 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
         private string BuildPathWithParams(string path, ApiRequestParameters parameters)
         {
-            //Для выбора полей GET https://{site_url}/_api/web/lists('{list_guid}')/items?$select=Title,Products/Name&$expand=Products/Name
-
-            bool isFirstParam = true;
-            
-            var pathBuilder = new StringBuilder(path);
+            List<string> queryParameters = new List<string>();            
 
             if(!string.IsNullOrEmpty(parameters.Select))
-            {
-                pathBuilder.Append(isFirstParam ? "?" : "&");
-                isFirstParam = false;
-                pathBuilder.Append($"$select={parameters.Select}");
+            {                
+                queryParameters.Add($"$select={parameters.Select}");
+            }
+
+            if (!string.IsNullOrEmpty(parameters.Expand))
+            {                
+                queryParameters.Add($"$expand={parameters.Expand}");
             }
 
             if (parameters.Top != 100)
             {
-                pathBuilder.Append(isFirstParam ? "?" : "&");
-                isFirstParam = false;
-                pathBuilder.Append($"$top={parameters.Top}");
+                queryParameters.Add($"$top={parameters.Top}");
             }
 
-            var result = pathBuilder.ToString();
+            if(!queryParameters.Any())
+            {
+                return path;
+            }
+
+            var result = $"{path}?{string.Join("&", queryParameters)}";
 
             return result;
         }

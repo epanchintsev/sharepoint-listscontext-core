@@ -17,6 +17,7 @@ namespace AE.SharePoint.ListsContextCore
         
         private readonly FormDigestStorage formDigestStorage;
         private readonly SharePointRestApiClient restApiClient;
+        private readonly ContextOptions options;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
@@ -33,6 +34,8 @@ namespace AE.SharePoint.ListsContextCore
                 properties = GetPropertiesCreationInfo();
             }
 
+            options.DatesFromText = true; //TODO: пока просто для отладки. потом передавать настройки в конструктор.
+
             InitSharePointListProperties();
         }
 
@@ -40,8 +43,8 @@ namespace AE.SharePoint.ListsContextCore
         {
             foreach (var property in properties)
             {
-                var converter = new SharePointJsonConverter();
-                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, property.ListName });
+                var converter = new SharePointJsonConverter(options.DatesFromText);
+                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, options, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }
         }
