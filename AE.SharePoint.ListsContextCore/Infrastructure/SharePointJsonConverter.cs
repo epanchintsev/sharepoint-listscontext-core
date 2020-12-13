@@ -56,7 +56,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             foreach(var property in properties)
             {
                 JsonElement source = IsDateFormText(property) ?
-                    sourceJson.GetProperty("FieldValusesAsText"):
+                    sourceJson.GetProperty("FieldValuesAsText"):
                     sourceJson;
                 
                 if(!source.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
