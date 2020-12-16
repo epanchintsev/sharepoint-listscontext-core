@@ -202,3 +202,7 @@ List<ArticleListItem> selectedItems = await context.Articles
 - Created method for adding item to SharePoint List: Task<T> AddItemAsync(T item)
 - Created method for updating item in SharePoint List: Task UpdateItemAsync(T item)
 - Created method for deleting item from SharePoint List: Task DeleteItemAsync(int id)
+
+### Version 1.2.0
+- Created method for limiting retrieved items SharePointList<T> Take(int count)
+- Created methods for limiting retrieved fields SharePointList<T> IncludeFields(Expression<Func<T,object>> fields), SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
