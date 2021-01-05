@@ -21,11 +21,22 @@ namespace AE.SharePoint.ListsContextCore
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
+        /// HttpClient and default options.
+        /// </summary>
+        /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
+        public SharePointListsContext(HttpClient httpClient): this(httpClient, new ContextOptions())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
         /// HttpClient.
         /// </summary>
         /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
-        public SharePointListsContext(HttpClient httpClient)
+        /// <param name="options"></param>
+        public SharePointListsContext(HttpClient httpClient, ContextOptions options)
         {
+            this.options = options;
             restApiClient = new SharePointRestApiClient(httpClient);
             formDigestStorage = new FormDigestStorage(restApiClient);            
 
@@ -35,6 +46,7 @@ namespace AE.SharePoint.ListsContextCore
             }
 
             options.DatesFromText = true; //TODO: пока просто для отладки. потом передавать настройки в конструктор.
+            options.DatesFromTextFormat = "yyyy.MM.dd hh:mm:ss";
 
             InitSharePointListProperties();
         }
@@ -43,7 +55,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             foreach (var property in properties)
             {
-                var converter = new SharePointJsonConverter(options.DatesFromText);
+                var converter = new SharePointJsonConverter(options.DatesFromText, options.DatesFromTextFormat);
                 var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, options, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }

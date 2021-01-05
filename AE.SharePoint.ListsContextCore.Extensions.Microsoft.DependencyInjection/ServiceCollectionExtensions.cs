@@ -33,6 +33,8 @@ namespace AE.SharePoint.ListsContextCore.Extensions.Microsoft.DependencyInjectio
                 .AddHttpClient<T>(client => HttpClientHelper.ConfigureHttpClient(client, opt))
                 .ConfigurePrimaryHttpMessageHandler(() => HttpClientHelper.GetHttpClientHandler(opt.Credentials))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            //serviceCollection.AddSingleton<ContextOptions>(provider => opt.ContextOptions);
         }
     }
 }

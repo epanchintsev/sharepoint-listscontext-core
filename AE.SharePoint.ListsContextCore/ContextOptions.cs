@@ -7,5 +7,7 @@ namespace AE.SharePoint.ListsContextCore
     public class ContextOptions
     {
         public bool DatesFromText { get; set; }
+
+        public string DatesFromTextFormat { get; set; }
     }
 }
