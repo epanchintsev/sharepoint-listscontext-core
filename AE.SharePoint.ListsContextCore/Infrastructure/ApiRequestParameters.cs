@@ -8,6 +8,8 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
     {
         public string Select { get; set; }
 
+        public string Expand { get; set; }
+
         public int Top { get; set; } = 100;
     }
 }

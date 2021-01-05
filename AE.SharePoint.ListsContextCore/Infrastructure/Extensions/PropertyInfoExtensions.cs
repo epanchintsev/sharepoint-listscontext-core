@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 
@@ -6,7 +7,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
 {
     internal static class PropertyInfoExtensions
     {
-        public static void SetValueFromJson(this PropertyInfo property, Object obj, JsonElement value)
+        public static void SetValueFromJson(this PropertyInfo property, Object obj, JsonElement value, string dateTimeFormat = null)
         {            
             TypeCode typeCode = Type.GetTypeCode(property.PropertyType);
 
@@ -40,7 +41,21 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
                     property.SetValue(obj, boolValue);
                     break;
                 case TypeCode.DateTime:
-                    DateTime dateTimeValue = value.ValueKind == JsonValueKind.Null ? DateTime.MinValue : value.GetDateTime();
+                    DateTime dateTimeValue;
+                    if(value.ValueKind == JsonValueKind.Null)
+                    {
+                        dateTimeValue = DateTime.MinValue;
+                    } 
+                    else if(!string.IsNullOrEmpty(dateTimeFormat))
+                    {
+                        var stringDateTimeValue = value.GetString();
+                        dateTimeValue = DateTime.ParseExact(stringDateTimeValue, dateTimeFormat, CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        dateTimeValue = value.GetDateTime();
+                    }                    
+                    
                     property.SetValue(obj, dateTimeValue);
                     break;
                 case TypeCode.String:
