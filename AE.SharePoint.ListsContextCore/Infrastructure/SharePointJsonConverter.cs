@@ -12,8 +12,13 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 {
     internal class SharePointJsonConverter : IConverter
     {
-        public SharePointJsonConverter()
-        {            
+        private readonly bool datesFromText;
+        private readonly string datesFromTextFormat;
+
+        public SharePointJsonConverter(bool datesFromText, string datesFromTextFormat)
+        {
+            this.datesFromText = datesFromText;
+            this.datesFromTextFormat = datesFromTextFormat;
         }
 
         public T ConvertFromSPEntity<T>(object source, IEnumerable<ListItemPropertyCreationInfo> properties) where T : new()
@@ -45,13 +50,19 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return CreateJson(source, sharePointTypeName, properties);
         }
 
+        private string DateTimeFormat => datesFromText ? datesFromTextFormat : string.Empty;
+
         private T CreateObject<T>(JsonElement sourceJson, IEnumerable<ListItemPropertyCreationInfo> properties) where T : new()
         {
             var newItem = new T();
 
             foreach(var property in properties)
             {
-                if(!sourceJson.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
+                JsonElement source = IsDateFormText(property) ?
+                    sourceJson.GetProperty("FieldValuesAsText"):
+                    sourceJson;
+                
+                if(!source.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
                 {
                     //TODO: Сделать новый тип для исключения.
                     throw new Exception($"Can`t find SharePoint field for property {property.PropertyToSet.Name}");
@@ -180,7 +191,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             return resultJson;
         }
 
-        private static void SetValueType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
+        private void SetValueType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
         {
             Type type = propertyToSet.PropertyType;
 
@@ -197,10 +208,10 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 }
             }
 
-            propertyToSet.SetValueFromJson(targetItem, jsonField);            
+            propertyToSet.SetValueFromJson(targetItem, jsonField, DateTimeFormat);            
         }
 
-        public static void SetReferenceType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
+        public void SetReferenceType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
         {
             Type type = propertyToSet.PropertyType;
             //TODO: а если это всё таки null? нужен какой то признак обязательное ли это поле или нет! атрибут который задает логику.
@@ -256,7 +267,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             }
             else if (type == typeof(String))
             {
-                propertyToSet.SetValueFromJson(targetItem, jsonField);
+                propertyToSet.SetValueFromJson(targetItem, jsonField, DateTimeFormat);
             }
             //else if (type == typeof(SharePointUrlField))
             //{
@@ -296,5 +307,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         //{
         //    throw new NotImplementedException(string.Format("Не реализовано преобразование поля списка SharePoint для типа данных {0}", type));
         //}
+
+        private bool IsDateFormText(ListItemPropertyCreationInfo propertyCreationInfo)
+        {
+            var isDateFromText = datesFromText && Type.GetTypeCode(propertyCreationInfo.PropertyToSet.PropertyType) == TypeCode.DateTime;
+            return isDateFromText;
+        }
     }
 }
