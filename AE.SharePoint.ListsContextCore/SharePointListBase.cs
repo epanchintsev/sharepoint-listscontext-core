@@ -49,12 +49,23 @@ namespace AE.SharePoint.ListsContextCore
 
             var creationInfo = GetAllowedProperties(selfType)
                 .Select(property =>
-                    new ListItemPropertyCreationInfo
+                {
+                    var fieldTypeAttribute = property.GetCustomAttributes(true).FirstOrDefault(a => a is SharePointFieldTypeAttribute);
+
+                    var info = new ListItemPropertyCreationInfo
                     {
                         PropertyToSet = property,
-                        SharePointFieldName = GetSharePointFieldName(property)
+                        SharePointFieldName = GetSharePointFieldName(property),
+                        SharePointFieldType = GetSharePointFieldType(fieldTypeAttribute)
+                    };
+
+                    if(info.SharePointFieldType == SharePointFieldType.LookupValue)
+                    {
+                        info.AdditionalData = ((SharePointLookupValueAttribute)fieldTypeAttribute).PulledFieldName;
                     }
-                )
+
+                    return info;
+                })
                 .ToList();
 
             return creationInfo;
@@ -68,9 +79,6 @@ namespace AE.SharePoint.ListsContextCore
             IEnumerable<PropertyInfo> properties = selfType
                 .GetProperties()
                 .Where(p => p.CanWrite && p.GetCustomAttributes(typeof(SharePointNotMappedAttribute)).Count() == 0);
-
-            //TODO: Ограничить передаваемые свойства можно еще с помощью специальных методов Include и Exclude
-
             return properties;
         }
 
@@ -79,6 +87,14 @@ namespace AE.SharePoint.ListsContextCore
             var fieldNameAttribute = property.GetCustomAttributes(true).FirstOrDefault(a => a is SharePointFieldNameAttribute);
             string fieldName = fieldNameAttribute != null ? ((SharePointFieldNameAttribute)fieldNameAttribute).Name : property.Name;
             return fieldName;
+        }
+
+        private static SharePointFieldType GetSharePointFieldType(object fieldTypeAttribute)
+        {
+            SharePointFieldType type = fieldTypeAttribute != null ? 
+                ((SharePointFieldTypeAttribute)fieldTypeAttribute).Type :
+                SharePointFieldType.Inherited;
+            return type;
         }
     }
 }

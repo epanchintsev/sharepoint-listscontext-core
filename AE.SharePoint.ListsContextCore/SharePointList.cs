@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 
 using AE.SharePoint.ListsContextCore.Infrastructure;
@@ -19,10 +20,11 @@ namespace AE.SharePoint.ListsContextCore
         private readonly SharePointRestApiClient restApiClient;
         private readonly IConverter converter;
         private readonly FormDigestStorage formDigestStorage;
+        private readonly ContextOptions contextOptions;
 
         private int top;
         private string[] includedFields;
-        private string[] excludedFields;        
+        private string[] excludedFields;
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePoint list with the specified
@@ -31,12 +33,19 @@ namespace AE.SharePoint.ListsContextCore
         /// <param name="restApiClient">The instance of SharePointRestApiClient.</param>
         /// <param name="formDigestStorage"></param>
         /// <param name="converter"></param>
+        /// <param name="contextOptions"></param>
         /// <param name="listName">The name of the SharePoint list, displayed at the SharePoint site.</param>
-        internal SharePointList(SharePointRestApiClient restApiClient, FormDigestStorage formDigestStorage, IConverter converter, string listName): base(listName)
+        internal SharePointList(
+            SharePointRestApiClient restApiClient, 
+            FormDigestStorage formDigestStorage, 
+            IConverter converter,
+            ContextOptions contextOptions,
+            string listName): base(listName)
         {
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
             this.converter = converter;
+            this.contextOptions = contextOptions;
 
             ResetParams();
         }
@@ -58,7 +67,7 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<List<T>> GetAllItemsAsync()
         {
             var usedProperties = GetUsedProperties();
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Top = top };
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Expand = GetExpandParameter(usedProperties), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, parameters);
             var result = converter.ConvertFromSPEntities<T>(json, usedProperties);
             ResetParams();
@@ -75,7 +84,7 @@ namespace AE.SharePoint.ListsContextCore
         public async Task<T> GetItemAsync(int id)
         {
             var usedProperties = GetUsedProperties();
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties) };
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Expand = GetExpandParameter(usedProperties)};
             var json = await restApiClient.GetItemAsync(listName, id, parameters);
             var result = converter.ConvertFromSPEntity<T>(json, usedProperties);
             ResetParams();
@@ -92,7 +101,7 @@ namespace AE.SharePoint.ListsContextCore
         {            
             var digest = await formDigestStorage.GetFormDigestAsync();
             var usedProperties = GetUsedProperties();
-            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Top = top };
+            var parameters = new ApiRequestParameters { Select = GetSelectParameter(usedProperties), Expand = GetExpandParameter(usedProperties), Top = top };
             var json = await restApiClient.GetItemsAsync(listName, digest, query, parameters);
             var result = converter.ConvertFromSPEntities<T>(json, usedProperties);
             ResetParams();
@@ -213,13 +222,59 @@ namespace AE.SharePoint.ListsContextCore
 
         private string GetSelectParameter(IEnumerable<ListItemPropertyCreationInfo> properties)
         {
-            var selectParameter = string.Join(",", properties.Select(x => x.SharePointFieldName));
+            var fieldNames = properties.Select(property => {
+                if(contextOptions.DatesFromText)
+                {
+                    TypeCode typeCode = Type.GetTypeCode(property.PropertyToSet.PropertyType);
+                    if(typeCode == TypeCode.DateTime)
+                    {
+                        return $"FieldValuesAsText/{property.SharePointFieldName}";
+                    }
+                }
+
+                if(property.SharePointFieldType == SharePointFieldType.LookupId)
+                {
+                    return $"{property.SharePointFieldName}Id";
+                }
+
+                if(property.SharePointFieldType == SharePointFieldType.LookupValue)
+                {
+                    return $"{property.SharePointFieldName}/{property.AdditionalData}";
+                }
+
+                return property.SharePointFieldName;
+            });
+
+            var selectParameter = string.Join(",", fieldNames);
             return selectParameter;    
         }
 
-        private string GetExpandParameter()
+        private string GetExpandParameter(IEnumerable<ListItemPropertyCreationInfo> properties)
         {
-            return string.Empty;
+            List<string> expandParameters = new List<string>();
+            
+            if(contextOptions.DatesFromText)
+            {
+                bool isDateTimePropertyExists = properties.Any(property =>
+                {
+                    TypeCode typeCode = Type.GetTypeCode(property.PropertyToSet.PropertyType);
+                    return typeCode == TypeCode.DateTime;
+                });
+                
+                if(isDateTimePropertyExists)
+                {
+                    expandParameters.Add("FieldValuesAsText");
+                }
+            }
+
+            expandParameters.AddRange(
+                properties
+                    .Where(p => p.SharePointFieldType == SharePointFieldType.LookupValue)
+                    .Select(p => (string)p.AdditionalData)
+            );
+
+            var result = string.Join(",", expandParameters);
+            return result;
         }
 
         private void ResetParams()
