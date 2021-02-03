@@ -232,6 +232,16 @@ namespace AE.SharePoint.ListsContextCore
                     }
                 }
 
+                if(property.SharePointFieldType == SharePointFieldType.LookupId)
+                {
+                    return $"{property.SharePointFieldName}Id";
+                }
+
+                if(property.SharePointFieldType == SharePointFieldType.LookupValue)
+                {
+                    return $"{property.SharePointFieldName}/{property.AdditionalData}";
+                }
+
                 return property.SharePointFieldName;
             });
 
@@ -256,6 +266,12 @@ namespace AE.SharePoint.ListsContextCore
                     expandParameters.Add("FieldValuesAsText");
                 }
             }
+
+            expandParameters.AddRange(
+                properties
+                    .Where(p => p.SharePointFieldType == SharePointFieldType.LookupValue)
+                    .Select(p => (string)p.AdditionalData)
+            );
 
             var result = string.Join(",", expandParameters);
             return result;

@@ -58,11 +58,10 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
             foreach(var property in properties)
             {
-                JsonElement source = IsDateFormText(property) ?
-                    sourceJson.GetProperty("FieldValuesAsText"):
-                    sourceJson;
-                
-                if(!source.TryGetProperty(property.SharePointFieldName, out JsonElement jsonField))
+                JsonElement source = GetJsonSource(sourceJson, property);
+                string jsonFieldName = GetJsonFieldName(property);
+
+                if (!source.TryGetProperty(jsonFieldName, out JsonElement jsonField))
                 {
                     //TODO: Сделать новый тип для исключения.
                     throw new Exception($"Can`t find SharePoint field for property {property.PropertyToSet.Name}");
@@ -313,5 +312,39 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             var isDateFromText = datesFromText && Type.GetTypeCode(propertyCreationInfo.PropertyToSet.PropertyType) == TypeCode.DateTime;
             return isDateFromText;
         }
+
+        private JsonElement GetJsonSource(JsonElement sourceJson, ListItemPropertyCreationInfo property)
+        {
+            if(IsDateFormText(property))
+            {
+                return sourceJson.GetProperty("FieldValuesAsText");
+            }
+            
+            if(property.SharePointFieldType == SharePointFieldType.LookupValue)
+            {
+                return sourceJson.GetProperty(property.SharePointFieldName);
+            }            
+
+            return sourceJson;
+        }
+
+        private static string GetJsonFieldName(ListItemPropertyCreationInfo property)
+        {
+            string fieldName;
+            switch(property.SharePointFieldType)
+            {
+                case SharePointFieldType.LookupId:                    
+                    fieldName = $"{property.SharePointFieldName}Id";
+                    break;
+                case SharePointFieldType.LookupValue:
+                    fieldName = (string)property.AdditionalData;
+                    break;
+                default:
+                    fieldName = property.SharePointFieldName;
+                    break;
+            }
+
+            return fieldName;
+        }        
     }
 }

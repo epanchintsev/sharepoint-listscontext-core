@@ -7,5 +7,9 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         public PropertyInfo PropertyToSet { get; set; }
 
         public string SharePointFieldName { get; set; }
+
+        public SharePointFieldType SharePointFieldType { get; set; }
+
+        public object AdditionalData { get; set; }
     }
 }
