@@ -270,7 +270,7 @@ namespace AE.SharePoint.ListsContextCore
             expandParameters.AddRange(
                 properties
                     .Where(p => p.SharePointFieldType == SharePointFieldType.LookupValue)
-                    .Select(p => (string)p.AdditionalData)
+                    .Select(p => (string)p.SharePointFieldName)
             );
 
             var result = string.Join(",", expandParameters);
