@@ -20,7 +20,7 @@ namespace AE.SharePoint.ListsContextCore
         private readonly SharePointRestApiClient restApiClient;
         private readonly IConverter converter;
         private readonly FormDigestStorage formDigestStorage;
-        private readonly ContextOptions contextOptions;
+        private readonly SharePointListsContext context;
 
         private int top;
         private string[] includedFields;
@@ -33,19 +33,19 @@ namespace AE.SharePoint.ListsContextCore
         /// <param name="restApiClient">The instance of SharePointRestApiClient.</param>
         /// <param name="formDigestStorage"></param>
         /// <param name="converter"></param>
-        /// <param name="contextOptions"></param>
+        /// <param name="context"></param>
         /// <param name="listName">The name of the SharePoint list, displayed at the SharePoint site.</param>
         internal SharePointList(
             SharePointRestApiClient restApiClient, 
             FormDigestStorage formDigestStorage, 
             IConverter converter,
-            ContextOptions contextOptions,
+            SharePointListsContext context,
             string listName): base(listName)
         {
             this.restApiClient = restApiClient;
             this.formDigestStorage = formDigestStorage;
             this.converter = converter;
-            this.contextOptions = contextOptions;
+            this.context = context;
 
             ResetParams();
         }
@@ -223,7 +223,7 @@ namespace AE.SharePoint.ListsContextCore
         private string GetSelectParameter(IEnumerable<ListItemPropertyCreationInfo> properties)
         {
             var fieldNames = properties.Select(property => {
-                if(contextOptions.DatesFromText)
+                if(context.DatesFromText)
                 {
                     TypeCode typeCode = Type.GetTypeCode(property.PropertyToSet.PropertyType);
                     if(typeCode == TypeCode.DateTime)
@@ -253,7 +253,7 @@ namespace AE.SharePoint.ListsContextCore
         {
             List<string> expandParameters = new List<string>();
             
-            if(contextOptions.DatesFromText)
+            if(context.DatesFromText)
             {
                 bool isDateTimePropertyExists = properties.Any(property =>
                 {
@@ -270,7 +270,7 @@ namespace AE.SharePoint.ListsContextCore
             expandParameters.AddRange(
                 properties
                     .Where(p => p.SharePointFieldType == SharePointFieldType.LookupValue)
-                    .Select(p => (string)p.SharePointFieldName)
+                    .Select(p => p.SharePointFieldName)
             );
 
             var result = string.Join(",", expandParameters);
