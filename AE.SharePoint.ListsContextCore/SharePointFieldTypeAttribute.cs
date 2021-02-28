@@ -5,6 +5,9 @@ using System.Text;
 
 namespace AE.SharePoint.ListsContextCore
 {
+    /// <summary>
+    /// Attribute used to mark the specific property of the SharePoint list model.
+    /// </summary>
     public abstract class SharePointFieldTypeAttribute: Attribute
     {
         private SharePointFieldType type;

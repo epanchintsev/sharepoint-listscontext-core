@@ -17,15 +17,33 @@ namespace AE.SharePoint.ListsContextCore
         
         private readonly FormDigestStorage formDigestStorage;
         private readonly SharePointRestApiClient restApiClient;
-        private readonly ContextOptions options;
+
+        /// <summary>
+        /// Set to true to getting value of DateTime type property as displaed on SharePoint form.
+        /// </summary>
+        public bool DatesFromText { get; private set; }
+
+        /// <summary>
+        /// Specifies the format of conversion from string to DateTime when using dates from text.
+        /// </summary>
+        public string DatesFromTextFormat { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the AE.SharePoint.ListsContextCore.SharePointListsContext list with the specified
         /// HttpClient and default options.
         /// </summary>
         /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
-        public SharePointListsContext(HttpClient httpClient): this(httpClient, new ContextOptions())
+        public SharePointListsContext(HttpClient httpClient)
         {
+            restApiClient = new SharePointRestApiClient(httpClient);
+            formDigestStorage = new FormDigestStorage(restApiClient);
+
+            if (properties == null)
+            {
+                properties = GetPropertiesCreationInfo();
+            }
+
+            InitSharePointListProperties();
         }
 
         /// <summary>
@@ -34,29 +52,18 @@ namespace AE.SharePoint.ListsContextCore
         /// </summary>
         /// <param name="httpClient">The instance of HttpClient that used to access to SharePoint REST API.</param>
         /// <param name="options"></param>
-        public SharePointListsContext(HttpClient httpClient, ContextOptions options)
+        public SharePointListsContext(HttpClient httpClient, ContextOptions options) : this(httpClient)
         {
-            this.options = options;
-            restApiClient = new SharePointRestApiClient(httpClient);
-            formDigestStorage = new FormDigestStorage(restApiClient);            
-
-            if (properties == null)
-            {
-                properties = GetPropertiesCreationInfo();
-            }
-
-            options.DatesFromText = true; //TODO: пока просто для отладки. потом передавать настройки в конструктор.
-            options.DatesFromTextFormat = "yyyy.MM.dd hh:mm:ss";
-
-            InitSharePointListProperties();
+            DatesFromText = options.DatesFromText;
+            DatesFromTextFormat = options.DatesFromTextFormat;            
         }
 
         private void InitSharePointListProperties()
         {
             foreach (var property in properties)
             {
-                var converter = new SharePointJsonConverter(options.DatesFromText, options.DatesFromTextFormat);
-                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, options, property.ListName });
+                var converter = new SharePointJsonConverter(DatesFromText, DatesFromTextFormat);
+                var propertyInstance = property.PropertyInstanceConstructor.Invoke(new object[] { restApiClient, formDigestStorage, converter, this, property.ListName });
                 property.PropertyToSet.SetValue(this, propertyInstance);
             }
         }
