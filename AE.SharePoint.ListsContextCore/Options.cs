@@ -17,7 +17,5 @@ namespace AE.SharePoint.ListsContextCore
         /// If not set, default credentials will be used.
         /// </summary>
         public ICredentials Credentials { get; set; }
-
-        public ContextOptions ContextOptions { get; set; }
     }
 }

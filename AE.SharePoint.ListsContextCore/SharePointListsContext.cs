@@ -16,10 +16,16 @@ namespace AE.SharePoint.ListsContextCore
         private static List<SharePointListCreationInfo> properties;
         
         private readonly FormDigestStorage formDigestStorage;
-        private readonly SharePointRestApiClient restApiClient;        
+        private readonly SharePointRestApiClient restApiClient;
 
+        /// <summary>
+        /// Set to true to getting value of DateTime type property as displaed on SharePoint form.
+        /// </summary>
         public bool DatesFromText { get; private set; }
 
+        /// <summary>
+        /// Specifies the format of conversion from string to DateTime when using dates from text.
+        /// </summary>
         public string DatesFromTextFormat { get; private set; }
 
         /// <summary>
