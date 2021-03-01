@@ -67,5 +67,15 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
                     break;
             }
         }
+
+        public static void SetSharePointUrlFieldFromJson(this PropertyInfo property, Object obj, JsonElement value)
+        {
+            var spUrlField = new SharePointUrlField
+            {
+                Url = value.GetProperty("Url").GetString(),
+                Description = value.GetProperty("Description").GetString()
+            };
+            property.SetValue(obj, spUrlField);
+        }
     }
 }
