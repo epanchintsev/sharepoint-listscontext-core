@@ -132,51 +132,42 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                         //    }
                         //    propertyToSet.SetValue(instance, spLookupFields.ToArray());
                         //}
-                        if (type.IsArray)
-                        {
-                            //Type elementType = type.GetElementType();
-                            //TypeCode elementTypeCode = Type.GetTypeCode(elementType);
+                        //if (type.IsArray)
+                        //{
+                        //Type elementType = type.GetElementType();
+                        //TypeCode elementTypeCode = Type.GetTypeCode(elementType);
 
-                            //var result = jsonField.EnumerateArray()
-                            //        .Select(o => o) //TODO: тут должно быть преобразование.
-                            //        .ToArray();
+                        //var result = jsonField.EnumerateArray()
+                        //        .Select(o => o) //TODO: тут должно быть преобразование.
+                        //        .ToArray();
 
-                            //switch (elementTypeCode)
-                            //{
-                            //    case TypeCode.Int32:
-                            //        int[] int32Values = ((IEnumerable<int>)value).ToArray();
-                            //        propertyToSet.SetValue(instance, int32Values);
-                            //        break;
-                            //    case TypeCode.String:
-                            //        string[] stringValues = ((IEnumerable<string>)value).ToArray();
-                            //        propertyToSet.SetValue(instance, stringValues);
-                            //        break;
-                            //    default:
-                            //        ThrowNotImplementedException(type);
-                            //        break;
-                            //}
-                        }
-                        else if (type == typeof(String))
+                        //switch (elementTypeCode)
+                        //{
+                        //    case TypeCode.Int32:
+                        //        int[] int32Values = ((IEnumerable<int>)value).ToArray();
+                        //        propertyToSet.SetValue(instance, int32Values);
+                        //        break;
+                        //    case TypeCode.String:
+                        //        string[] stringValues = ((IEnumerable<string>)value).ToArray();
+                        //        propertyToSet.SetValue(instance, stringValues);
+                        //        break;
+                        //    default:
+                        //        ThrowNotImplementedException(type);
+                        //        break;
+                        //}
+                        //}
+                        //else if (type == typeof(String))
+                        if (type == typeof(String))
                         {
                             writer.Write(sourceObject, property);
                         }
-                        //else if (type == typeof(SharePointUrlField))
-                        //{
-                        //    SharePointUrlField spUrlField;
-                        //    if (value == null)
-                        //    {
-                        //        spUrlField = new SharePointUrlField();
-                        //    }
-                        //    else
-                        //    {
-                        //        FieldUrlValue fieldUrlValue = (FieldUrlValue)value;
-                        //        spUrlField = new SharePointUrlField(fieldUrlValue.Url, fieldUrlValue.Description);
-                        //    }
-                        //    propertyToSet.SetValue(targetItem, spUrlField);
-                        //}
+                        else if (type == typeof(SharePointUrlField))
+                        {
+                            writer.WriteSharePointUrlFieldObject(sourceObject, property);
+                        }
                         else
                         {
-                            //ThrowNotImplementedException(type);
+                            ThrowNotImplementedException(type);
                         }
                     }
                 }
@@ -188,27 +179,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             }
 
             return resultJson;
-        }
-
-        private void SetValueType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
-        {
-            Type type = propertyToSet.PropertyType;
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                if (jsonField.ValueKind == JsonValueKind.Null)
-                {
-                    propertyToSet.SetValue(targetItem, null);
-                    return;
-                }
-                else
-                {
-                    type = type.GetGenericArguments()[0];
-                }
-            }
-
-            propertyToSet.SetValueFromJson(targetItem, jsonField, DateTimeFormat);            
-        }
+        }        
 
         public void SetReferenceType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
         {
@@ -268,23 +239,13 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             {
                 propertyToSet.SetValueFromJson(targetItem, jsonField, DateTimeFormat);
             }
-            //else if (type == typeof(SharePointUrlField))
-            //{
-            //    SharePointUrlField spUrlField;
-            //    if (value == null)
-            //    {
-            //        spUrlField = new SharePointUrlField();
-            //    }
-            //    else
-            //    {
-            //        FieldUrlValue fieldUrlValue = (FieldUrlValue)value;
-            //        spUrlField = new SharePointUrlField(fieldUrlValue.Url, fieldUrlValue.Description);
-            //    }
-            //    propertyToSet.SetValue(targetItem, spUrlField);
-            //}
+            else if (type == typeof(SharePointUrlField))
+            {
+                propertyToSet.SetSharePointUrlFieldFromJson(targetItem, jsonField);
+            }
             else
             {
-                //ThrowNotImplementedException(type);
+                ThrowNotImplementedException(type);
             }
         }
 
@@ -302,10 +263,25 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
         //    propertyToSet.SetValue(instance, attachments);
         //}
 
-        //private static void ThrowNotImplementedException(Type type)
-        //{
-        //    throw new NotImplementedException(string.Format("Не реализовано преобразование поля списка SharePoint для типа данных {0}", type));
-        //}
+        private void SetValueType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
+        {
+            Type type = propertyToSet.PropertyType;
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                if (jsonField.ValueKind == JsonValueKind.Null)
+                {
+                    propertyToSet.SetValue(targetItem, null);
+                    return;
+                }
+                else
+                {
+                    type = type.GetGenericArguments()[0];
+                }
+            }
+
+            propertyToSet.SetValueFromJson(targetItem, jsonField, DateTimeFormat);
+        }
 
         private bool IsDateFormText(ListItemPropertyCreationInfo propertyCreationInfo)
         {
@@ -345,6 +321,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
             }
 
             return fieldName;
-        }        
+        }
+        
+        private static void ThrowNotImplementedException(Type type)
+        {
+            throw new NotImplementedException(string.Format("Converter for type {0} not implemented.", type));
+        }
     }
 }
