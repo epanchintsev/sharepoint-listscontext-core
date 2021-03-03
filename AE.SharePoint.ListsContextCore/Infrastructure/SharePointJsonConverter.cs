@@ -183,8 +183,12 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
 
         public void SetReferenceType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
         {
-            Type type = propertyToSet.PropertyType;
-            //TODO: а если это всё таки null? нужен какой то признак обязательное ли это поле или нет! атрибут который задает логику.
+            if(jsonField.ValueKind == JsonValueKind.Null)
+            {
+                return;
+            }            
+            
+            Type type = propertyToSet.PropertyType;            
             
             //TODO: Узнать как тепреь передаются такие типы.
             //if (type == typeof(SharePointLookupField))
