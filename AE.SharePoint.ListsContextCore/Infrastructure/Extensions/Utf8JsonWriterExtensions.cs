@@ -47,5 +47,17 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
             }
             
         }
+
+        public static void WriteSharePointUrlFieldObject(this Utf8JsonWriter writer, Object obj, ListItemPropertyCreationInfo propertyCreationInfo)
+        {
+            writer.WriteStartObject(propertyCreationInfo.SharePointFieldName);
+            var sharePointUrlFieldValue = (SharePointUrlField)propertyCreationInfo.PropertyToSet.GetValue(obj);
+            if (sharePointUrlFieldValue != null)
+            {
+                writer.WriteString("Url", sharePointUrlFieldValue.Url);
+                writer.WriteString("Description", sharePointUrlFieldValue.Description);
+            }
+            writer.WriteEndObject();
+        }
     }
 }
