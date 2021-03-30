@@ -13,18 +13,11 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure.Extensions
 
             switch (typeCode)
             {
-                case TypeCode.Int32:
-                    // шарепоинт ссылочные поля преобразует в строки, при преобразовании поля типа число у него появляются точка и нули после запятой.
-                    //int int32Value = Attribute.IsDefined(property.PropertyToSet, typeof(LookupValueAttribute)) ?
-                    //    Convert.ToInt32(value.ToString().Replace(',', '.').Split('.').First()) :
-                    //    Convert.ToInt32(value);
+                case TypeCode.Int32:                    
                     int int32Value = value.GetInt32();
                     property.SetValue(obj, int32Value);
                     break;
-                case TypeCode.Int64:
-                    //long int64Value = Attribute.IsDefined(propertyToSet, typeof(LookupValueAttribute)) ?
-                    //    Convert.ToInt64(value.ToString().Replace(',', '.').Split('.').First()) :
-                    //    Convert.ToInt64(value);
+                case TypeCode.Int64:                    
                     long int64Value = value.GetInt64();
                     property.SetValue(obj, int64Value);
                     break;

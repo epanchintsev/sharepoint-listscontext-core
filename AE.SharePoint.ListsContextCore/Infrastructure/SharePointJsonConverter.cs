@@ -105,58 +105,7 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                     }
                     else
                     {
-                        //TODO: а если это всё таки null? нужен какой то признак обязательное ли это поле или нет! атрибут который задает логику.
-
-                        //TODO: Узнать как тепреь передаются такие типы.
-                        //if (type == typeof(SharePointLookupField))
-                        //{
-                        //    SharePointLookupField spLookupField;
-                        //    if (value == null)
-                        //    {
-                        //        spLookupField = new SharePointLookupField();
-                        //    }
-                        //    else
-                        //    {
-                        //        FieldLookupValue fieldLookupValue = (FieldLookupValue)value;
-                        //        spLookupField = new SharePointLookupField(fieldLookupValue.LookupId, fieldLookupValue.LookupValue);
-                        //    }
-                        //    propertyToSet.SetValue(instance, spLookupField);
-                        //}
-                        //else if (type == typeof(SharePointLookupField[])) //Эта проверка должна идти впереди проверки на тип IsArray
-                        //{
-                        //    List<SharePointLookupField> spLookupFields = new List<SharePointLookupField>();
-                        //    foreach (FieldLookupValue field in (FieldLookupValue[])value)
-                        //    {
-                        //        SharePointLookupField spLookupField = new SharePointLookupField(field.LookupId, field.LookupValue);
-                        //        spLookupFields.Add(spLookupField);
-                        //    }
-                        //    propertyToSet.SetValue(instance, spLookupFields.ToArray());
-                        //}
-                        //if (type.IsArray)
-                        //{
-                        //Type elementType = type.GetElementType();
-                        //TypeCode elementTypeCode = Type.GetTypeCode(elementType);
-
-                        //var result = jsonField.EnumerateArray()
-                        //        .Select(o => o) //TODO: тут должно быть преобразование.
-                        //        .ToArray();
-
-                        //switch (elementTypeCode)
-                        //{
-                        //    case TypeCode.Int32:
-                        //        int[] int32Values = ((IEnumerable<int>)value).ToArray();
-                        //        propertyToSet.SetValue(instance, int32Values);
-                        //        break;
-                        //    case TypeCode.String:
-                        //        string[] stringValues = ((IEnumerable<string>)value).ToArray();
-                        //        propertyToSet.SetValue(instance, stringValues);
-                        //        break;
-                        //    default:
-                        //        ThrowNotImplementedException(type);
-                        //        break;
-                        //}
-                        //}
-                        //else if (type == typeof(String))
+                        
                         if (type == typeof(String))
                         {
                             writer.Write(sourceObject, property);
@@ -188,56 +137,17 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 return;
             }            
             
-            Type type = propertyToSet.PropertyType;            
+            Type type = propertyToSet.PropertyType;             
             
-            //TODO: Узнать как тепреь передаются такие типы.
-            //if (type == typeof(SharePointLookupField))
-            //{
-            //    SharePointLookupField spLookupField;
-            //    if (value == null)
-            //    {
-            //        spLookupField = new SharePointLookupField();
-            //    }
-            //    else
-            //    {
-            //        FieldLookupValue fieldLookupValue = (FieldLookupValue)value;
-            //        spLookupField = new SharePointLookupField(fieldLookupValue.LookupId, fieldLookupValue.LookupValue);
-            //    }
-            //    propertyToSet.SetValue(instance, spLookupField);
-            //}
-            //else if (type == typeof(SharePointLookupField[])) //Эта проверка должна идти впереди проверки на тип IsArray
-            //{
-            //    List<SharePointLookupField> spLookupFields = new List<SharePointLookupField>();
-            //    foreach (FieldLookupValue field in (FieldLookupValue[])value)
-            //    {
-            //        SharePointLookupField spLookupField = new SharePointLookupField(field.LookupId, field.LookupValue);
-            //        spLookupFields.Add(spLookupField);
-            //    }
-            //    propertyToSet.SetValue(instance, spLookupFields.ToArray());
-            //}
             if (type.IsArray)
             {
                 Type elementType = type.GetElementType();
                 TypeCode elementTypeCode = Type.GetTypeCode(elementType);
 
                 var result = jsonField.EnumerateArray()
-                        .Select(o =>  o) //TODO: тут должно быть преобразование.
-                        .ToArray();
-
-                //switch (elementTypeCode)
-                //{
-                //    case TypeCode.Int32:
-                //        int[] int32Values = ((IEnumerable<int>)value).ToArray();
-                //        propertyToSet.SetValue(instance, int32Values);
-                //        break;
-                //    case TypeCode.String:
-                //        string[] stringValues = ((IEnumerable<string>)value).ToArray();
-                //        propertyToSet.SetValue(instance, stringValues);
-                //        break;
-                //    default:
-                //        ThrowNotImplementedException(type);
-                //        break;
-                //}
+                    .Select(o =>  o) //TODO: тут должно быть преобразование.
+                    .ToArray();
+                
             }
             else if (type == typeof(String))
             {
@@ -252,20 +162,6 @@ namespace AE.SharePoint.ListsContextCore.Infrastructure
                 ThrowNotImplementedException(type);
             }
         }
-
-        //public static void SetAttachments(this PropertyInfo propertyToSet, Object instance, AttachmentCollection attachmentCollection, ClientContext context)
-        //{
-        //    List<SharePointAttachment> attachments = new List<SharePointAttachment>();
-        //    foreach (Attachment attachment in attachmentCollection)
-        //    {
-        //        SharePointAttachment spAttachment = new SharePointAttachment(context);
-        //        spAttachment.Name = attachment.FileName;
-        //        spAttachment.ServerRelativeUrl = attachment.ServerRelativeUrl;
-        //        spAttachment.Length = 0; //тут пока не ясно можно ли вообще узнать размер вложения.
-        //        attachments.Add(spAttachment);
-        //    }
-        //    propertyToSet.SetValue(instance, attachments);
-        //}
 
         private void SetValueType<T>(T targetItem, PropertyInfo propertyToSet, JsonElement jsonField)
         {
