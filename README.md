@@ -38,6 +38,8 @@ Supported types:
 * bool
 * DateTime
 * string
+* SharePoint Lookup
+* SharePoint URL
 
 Property mapped to SharePoint field by name.
 if you want to use property name different from SharePoint field name, use **SharePointFieldNameAttribute**.
@@ -70,6 +72,43 @@ class ArticleListItem
 }
 ```
 
+Use **SharePointLookupIdAttribute** if you want to get SharePoint Lookup Id value.
+Use **SharePointLookupValueAttribute** if you want to get SharePoint Lookup value.
+
+```csharp
+class ArticleListItem: IListItemBase
+{        
+    public int Id { get; set; }
+
+    public string Title { get; set; }
+
+    public string Description { get; set; }
+
+    [SharePointFieldName("Created")]
+    public DateTime PublicationDate { get; set; }
+
+    [SharePointNotMapped]
+    public string Year { get; set; }
+
+    [SharePointLookupId]
+    public int AuthorId { get; set; }
+
+    [SharePointLookupValue("Name")]
+    public int AuthorName { get; set; }
+}
+```
+
+Use **SharePointUrlField** class for SharePoint URL field type.
+
+```csharp
+class AuthorListItem: ListItemBase
+{
+    public string Name { get; set; }
+
+    SharePointUrlField Photo { get; set; }
+}
+```
+
 ### 2. Create class for SharePoint lists context.
 
 The class must inherit from **SharePointListsContext**.
@@ -80,6 +119,29 @@ Add to each property **SharePointListNameAttribute** with current name of ShareP
 class ExampleContext: SharePointListsContext
     {
         public ExampleContext(HttpClient client): base(client)
+        {            
+        }
+
+        [SharePointListName("ArticlesList")]
+        public SharePointList<ArticleListItem> Articles { get; set; }
+    }
+```
+
+Use ContextOptions to specify source and format for DateTime field.
+By default DateTime returns in UTC.
+
+```csharp
+class ExampleContext: SharePointListsContext
+    {
+        public ExampleContext(HttpClient client) :
+            base(
+                client,
+                new ContextOptions
+                {
+                    DatesFromText = true,
+                    DatesFromTextFormat = "dd.MM.YYYY hh:mm"
+                }
+            )
         {            
         }
 
@@ -206,3 +268,8 @@ List<ArticleListItem> selectedItems = await context.Articles
 ### Version 1.2.0
 - Created method for limiting retrieved items SharePointList<T> Take(int count)
 - Created methods for limiting retrieved fields SharePointList<T> IncludeFields(Expression<Func<T,object>> fields), SharePointList<T> ExcludeFields(Expression<Func<T, object>> fields)
+
+### Version 1.4.0
+- Added ContextOptions.
+- Added attributes for lookup: SharePointLookupIdAttribute and SharePointLookupValueAttribute.
+- Added SharePointUrlField class.
